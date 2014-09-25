@@ -12,7 +12,7 @@
 	<body id="space">
 
 		<script>
-			var SPEED = 10;
+			var SPEED = 1;
 			var NUM_STARS = 1000;
 			var svg = SVG('space')
 				.size('100%', '100%');
@@ -23,7 +23,7 @@
 			//populate
 			for(var i=0; i<NUM_STARS; i++) {
 				stars.push(svg
-					.circle(3)
+					.circle(4)
 					.cx(Math.random() * svg.viewbox().width)
 					.cy(Math.random() * svg.viewbox().height)
 					.fill(randomColor())
@@ -35,8 +35,8 @@
 				//move
 				for(var i in stars) {
 					var star = stars[i];
-					star.dx(-1);
-					if (star.x() < 0) {
+					star.animate(star.x(), '-', 0).move(0, star.y());
+					if (star.x() < 10) {
 						star.x(svg.viewbox().width);
 					}
 				}
@@ -47,7 +47,8 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
-			setInterval(tick, SPEED);
+			//setInterval(tick, SPEED);
+			tick();
 		</script>
 	</body>
 </html>
