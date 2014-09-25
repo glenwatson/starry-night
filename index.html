@@ -16,11 +16,6 @@
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
 			
-			ctx.fillStyle = "rgb(0, 0, 0)";
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			
-			ctx.fillStyle = "#ffffff";
-			
 			var stars = [];
 			//populate
 			for(var i=0; i<500; i++) {
@@ -29,8 +24,24 @@
 					y: Math.random() * canvas.height
 				});
 			}
-			drawStars(stars);
+			
+			setInterval(tick, 33);
+			//tick();
+			function tick() {
+				console.log('tick');
+				//move
+				for(var i in stars) {
+					var star = stars[i];
+					star.x--;
+					if (star.x < 0) {
+						star.x = canvas.width;
+					}
+				}
+				drawBG();
+				drawStars(stars);
+			}
 			function drawStars(stars) {
+				ctx.fillStyle = "#ffffff";
 				for(var i in stars) {
 					drawStar(stars[i].x, stars[i].y, ctx);
 				}
@@ -40,6 +51,10 @@
 				ctx.arc(x, y, 2, 0, Math.PI*2, true);
 				ctx.fill();
 				ctx.closePath();
+			}
+			function drawBG () {
+				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
 			}
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
