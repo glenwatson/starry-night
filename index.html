@@ -19,9 +19,20 @@
 			ctx.fillStyle = "rgb(0, 0, 0)";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
-			ctx.fillStyle = randomColor();
-			ctx.fillRect(50, 50, 15, 15);
-
+			ctx.fillStyle = "#ffffff";
+			for(var i=0; i<500; i++) {
+				drawStar(
+					Math.random() * canvas.width,
+					Math.random() * canvas.height,
+					ctx
+				);
+			}
+			function drawStar(x, y, ctx) {
+				ctx.beginPath();
+				ctx.arc(x, y, 2, 0, Math.PI*2, true);
+				ctx.fill();
+				ctx.closePath();
+			}
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
 			}
