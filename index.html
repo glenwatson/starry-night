@@ -20,12 +20,20 @@
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			
 			ctx.fillStyle = "#ffffff";
+			
+			var stars = [];
+			//populate
 			for(var i=0; i<500; i++) {
-				drawStar(
-					Math.random() * canvas.width,
-					Math.random() * canvas.height,
-					ctx
-				);
+				stars.push({
+					x: Math.random() * canvas.width,
+					y: Math.random() * canvas.height
+				});
+			}
+			drawStars(stars);
+			function drawStars(stars) {
+				for(var i in stars) {
+					drawStar(stars[i].x, stars[i].y, ctx);
+				}
 			}
 			function drawStar(x, y, ctx) {
 				ctx.beginPath();
