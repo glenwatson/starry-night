@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<style>
+			body {
+				margin: 0;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<svg id="space"><circle cx="50" cy="50" r="100" /></svg>
+<!--
+		<script>
+			var SPEED = 500;
+			var NUM_STARS = 1000;
+			var svg = document.getElementById('space');
+			svg.width = document.body.clientWidth;
+			svg.height = document.body.clientHeight;
+			
+			var stars = [];
+			//populate
+			for(var i=0; i<NUM_STARS; i++) {
+				stars.push({
+					x: Math.random() * svg.width,
+					y: Math.random() * svg.height,
+					color: randomColor()
+				});
+			}	
+			
+			function tick() {
+				console.log('tick');
+				//move
+				for(var i in stars) {
+					var star = stars[i];
+					star.x--;
+					if (star.x < 0) {
+						star.x = svg.width;
+					}
+				}
+				drawBG();
+				drawStars(stars);
+			}
+			function drawStars(stars) {
+				for(var i in stars) {
+					ctx.fillStyle = stars[i].color;
+					drawStar(stars[i].x, stars[i].y, ctx);
+				}
+			}
+			function drawStar(x, y, ctx) {
+				ctx.beginPath();
+				ctx.arc(x, y, 2, 0, Math.PI*2, true);
+				ctx.fill();
+				ctx.closePath();
+			}
+			function drawBG () {
+				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.fillRect(0, 0, svg.width, svg.height);
+			}
+			function randomColor() {
+				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
+			}
+			function randomHex() {
+				return Math.round(Math.random() * 16).toString(16);
+			}
+			setInterval(tick, SPEED);
+		</script>
+-->
+	</body>
+</html>
