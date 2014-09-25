@@ -11,6 +11,8 @@
 	<body>
 		<canvas id="space">No canvas support</canvas>
 		<script>
+			var SPEED = 500;
+			var NUM_STARS = 1000;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -18,15 +20,14 @@
 			
 			var stars = [];
 			//populate
-			for(var i=0; i<500; i++) {
+			for(var i=0; i<NUM_STARS; i++) {
 				stars.push({
 					x: Math.random() * canvas.width,
-					y: Math.random() * canvas.height
+					y: Math.random() * canvas.height,
+					color: randomColor()
 				});
-			}
+			}	
 			
-			setInterval(tick, 33);
-			//tick();
 			function tick() {
 				console.log('tick');
 				//move
@@ -41,8 +42,8 @@
 				drawStars(stars);
 			}
 			function drawStars(stars) {
-				ctx.fillStyle = "#ffffff";
 				for(var i in stars) {
+					ctx.fillStyle = stars[i].color;
 					drawStar(stars[i].x, stars[i].y, ctx);
 				}
 			}
@@ -62,6 +63,7 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
+			setInterval(tick, SPEED);
 		</script>
 	</body>
 </html>
