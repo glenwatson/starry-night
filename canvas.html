@@ -1,10 +1,19 @@
 <html>
 	<head>
 		<style>
-			body {
-				margin: 0;
+			html, body {
 				width: 100%;
 				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				background-color: #000000
+			}
+			canvas {
+				position: absolute;
+				left: 0;
+				top: 0;
 			}
 		</style>
 	</head>
@@ -16,7 +25,6 @@
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 200;
 			var DEBUG = true;
-			var DRAW_BG = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -36,7 +44,7 @@
 					color: randomColor()
 				});
 			}
-			/*
+			
 			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: 10}, strength: 10});
 			forces.push({pos: {x: 300, y: 300}, vect: {x: 10, y: 0}, strength: 10});
 			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: -10}, strength: 10});
@@ -44,16 +52,13 @@
 			forces.push({pos: {x: 700, y: 700}, vect: {x: 0, y: 5}, strength: 10});
 			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
 			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
-			*/
+
 			forces.push({pos: {x: 900, y: 300}, vect: {x: 0, y: 50}, strength: 5});
 			forces.push({pos: {x: 800, y: 200}, vect: {x: 50, y: 0}, strength: 5});
 			forces.push({pos: {x: 700, y: 300}, vect: {x: 0, y: -50}, strength: 5});
 			forces.push({pos: {x: 800, y: 400}, vect: {x: -50, y: 0}, strength: 5});
 			
 			//start
-			if (!DRAW_BG) {
-				drawBG();
-			}
 			start();
 			
 			function start() {
@@ -65,11 +70,8 @@
 				}
 			}
 			function tick() {
-				console.log('tick');
 				moveStars(stars);
-				if (DRAW_BG) {
-					drawBG();
-				}
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
@@ -129,10 +131,6 @@
 				ctx.beginPath();
 				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
 				ctx.stroke();
-			}
-			function drawBG () {
-				ctx.fillStyle = "#000000";
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
 			}
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
