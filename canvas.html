@@ -23,7 +23,7 @@
 			var ANIMATION_FRAME = false;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
-			var FORCE_DIST = 400;
+			var FORCE_DIST = 500;
 			var DEBUG = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
@@ -45,10 +45,10 @@
 				});
 			}
 			
-			forces.push({pos: {x: 100, y: 200}, vect: {x: 1300, y: 0}, strength: 5});
-			forces.push({pos: {x: 1400, y: 800}, vect: {x: -1300, y: 0}, strength: 5});
-			forces.push({pos: {x: 400, y: 50}, vect: {x: 0, y: 900}, strength: 5});
-			forces.push({pos: {x: 1100, y: 950}, vect: {x: 0, y: -900}, strength: 5});
+			forces.push({pos: {x: 100, y: 200}, vect: {x: 100, y: 200}, strength: 5});
+			forces.push({pos: {x: 1400, y: 800}, vect: {x: -100, y: -200}, strength: 5});
+			forces.push({pos: {x: 400, y: 950}, vect: {x: 200, y: -100}, strength: 5});
+			forces.push({pos: {x: 1100, y: 50}, vect: {x: -200, y: 100}, strength: 5});
 			//start
 			start();
 			
