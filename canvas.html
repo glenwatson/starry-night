@@ -33,6 +33,7 @@
 			ctx.textAlign = "end";
 			
 			var stars = [];
+			var hiddenStars = [];
 			var forces = [];
 			//populate
 			for(var i=0; i<NUM_STARS; i++) {
@@ -41,22 +42,15 @@
 						x: Math.random() * canvas.width,
 						y: Math.random() * canvas.height,
 					},
-					color: randomColor()
+					color: randomColor(),
+					hidden: false,
 				});
 			}
 			
-			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: 10}, strength: 10});
-			forces.push({pos: {x: 300, y: 300}, vect: {x: 10, y: 0}, strength: 10});
-			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: -10}, strength: 10});
-			forces.push({pos: {x: 300, y: 300}, vect: {x: -10, y: 0}, strength: 10});
-			forces.push({pos: {x: 700, y: 700}, vect: {x: 0, y: 5}, strength: 10});
-			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
-			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
-
-			forces.push({pos: {x: 900, y: 300}, vect: {x: 0, y: 50}, strength: 5});
-			forces.push({pos: {x: 800, y: 200}, vect: {x: 50, y: 0}, strength: 5});
-			forces.push({pos: {x: 700, y: 300}, vect: {x: 0, y: -50}, strength: 5});
-			forces.push({pos: {x: 800, y: 400}, vect: {x: -50, y: 0}, strength: 5});
+			forces.push({pos: {x: 0, y: 0}, vect: {x: 1500, y: 0}, strength: 10});
+			forces.push({pos: {x: 0, y: 300}, vect: {x: 1500, y: 0}, strength: 10});
+			forces.push({pos: {x: 0, y: 600}, vect: {x: 1500, y: 0}, strength: 10});
+			forces.push({pos: {x: 0, y: 900}, vect: {x: 1500, y: 0}, strength: 10});
 			
 			//start
 			start();
@@ -80,6 +74,11 @@
 				}
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
+				}
+				var s = hiddenStars.shift();
+				if (s) {
+					stars[s].pos = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
+					stars[s].hidden = false;
 				}
 			}
 			var fps = 0;
@@ -106,8 +105,15 @@
 			}
 			function drawStars(stars) {
 				for(var i in stars) {
-					ctx.fillStyle = stars[i].color;
-					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
+					if (!stars[i].hidden) {
+						if (isOutsideScreen(stars[i])) {
+							stars[i].hidden = true;
+							hiddenStars.push(i);
+						} else {
+							ctx.fillStyle = stars[i].color;
+							drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
+						}
+					}
 				}
 			}
 			function drawStar(x, y, ctx) {
@@ -138,6 +144,10 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
+			function isOutsideScreen(star) {
+				return star.pos.x < 0 || star.pos.y < 0 ||
+					star.pos.x > canvas.width || star.pos.y > canvas.height;
+			}
 			// ==Movement==
 			function moveStars(stars) {
 					for (var f in forces) {
@@ -158,6 +168,7 @@
 					}
 				}
 			}
+			// http://geomalgorithms.com/a02-_lines.html
 			function distPointToSegment(point, segStart, segEnd) {
 				var v = sub(segEnd, segStart);
 				var w = sub(point, segStart);
