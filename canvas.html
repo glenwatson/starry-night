@@ -1,24 +1,36 @@
 <html>
 	<head>
 		<style>
-			body {
-				margin: 0;
+			html, body {
 				width: 100%;
 				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				background-color: #000000
+			}
+			canvas {
+				position: absolute;
+				left: 0;
+				top: 0;
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
 		<script>
-			var SPEED = 10;
+			var ANIMATION_FRAME = false;
+			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
-			var FORCE_DIST = 250;
-			var FORCE_SCALE = 100
+			var FORCE_DIST = 400;
+			var DEBUG = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
+			ctx.font = "8pt Arial";
+			ctx.textAlign = "end";
 			
 			var stars = [];
 			var forces = [];
@@ -32,35 +44,53 @@
 					color: randomColor()
 				});
 			}
-			forces.push({pos: {x: 300, y: 300}, dir: {x: 10, y: 0}});
-			forces.push({pos: {x: 500, y: 300}, dir: {x: 10, y: 0}});
-			forces.push({pos: {x: 700, y: 300}, dir: {x: 10, y: 0}});
-			forces.push({pos: {x: 900, y: 300}, dir: {x: 10, y: 0}});
-			forces.push({pos: {x: 1100, y: 300}, dir: {x: 10, y: 0}});
-			forces.push({pos: {x: 1300, y: 300}, dir: {x: 10, y: 0}});
-
-			forces.push({pos: {x: 300, y: 700}, dir: {x: -10, y: 0}});
-			forces.push({pos: {x: 500, y: 700}, dir: {x: -10, y: 0}});
-			forces.push({pos: {x: 700, y: 700}, dir: {x: -10, y: 0}});
-			forces.push({pos: {x: 900, y: 700}, dir: {x: -10, y: 0}});
-			forces.push({pos: {x: 1100, y: 700}, dir: {x: -10, y: 0}});
-			forces.push({pos: {x: 1300, y: 700}, dir: {x: -10, y: 0}});
-			function tick() {
-				console.log('tick');
-				//move
-				for(var i in stars) {
-					var star = stars[i];
-						for (var f in forces) {
-						var force = forces[f];
-						var d = dist(star.pos, force.pos);
-						if (d < FORCE_DIST) {
-							star.pos.x += force.dir.x * (FORCE_DIST - d) / FORCE_SCALE;
-							star.pos.y += force.dir.y * (FORCE_DIST - d) / FORCE_SCALE;
-						}
-					}
+			
+			forces.push({pos: {x: 100, y: 200}, vect: {x: 1300, y: 0}, strength: 5});
+			forces.push({pos: {x: 1400, y: 800}, vect: {x: -1300, y: 0}, strength: 5});
+			forces.push({pos: {x: 400, y: 50}, vect: {x: 0, y: 900}, strength: 5});
+			forces.push({pos: {x: 1100, y: 950}, vect: {x: 0, y: -900}, strength: 5});
+			//start
+			start();
+			
+			function start() {
+				if (ANIMATION_FRAME && window.requestAnimationFrame) {
+					tick();
+				} else {
+					ANIMATION_FRAME = false;
+					setInterval(tick, SPEED);
 				}
-				drawBG();
+			}
+			function tick() {
+				moveStars(stars);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				drawStars(stars);
+				if (DEBUG) {
+					drawForces(forces);
+					drawFramerate();
+					drawFps();
+				}
+				if (ANIMATION_FRAME) {
+					requestAnimationFrame(tick);
+				}
+			}
+			var fps = 0;
+			var frameCount = 0;
+			function drawFps() {
+				frameCount++;
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText(fps+" fps", canvas.width-10, 20);
+			}
+			setInterval(function() {
+				fps = frameCount;
+				frameCount = 0;
+			}, 1000);
+			
+			var lastFrame = new Date().getTime();
+			function drawFramerate() {
+				var thisFrame = new Date().getTime();
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+				lastFrame = thisFrame;
 			}
 			function dist(pos1, pos2) {
 				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
@@ -77,9 +107,21 @@
 				ctx.fill();
 				ctx.closePath();
 			}
-			function drawBG () {
-				ctx.fillStyle = "rgb(0, 0, 0)";
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
+			function drawForces(forces) {
+				ctx.strokeStyle = "#ffffff";
+				for(var i in forces) {
+					drawForce(forces[i], ctx);
+				}
+			}
+			function drawForce(force, ctx) {
+				ctx.lineWidth = force.strength/5;
+				ctx.beginPath();
+				ctx.moveTo(force.pos.x, force.pos.y);
+				ctx.lineTo(force.pos.x+force.vect.x, force.pos.y+force.vect.y);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
+				ctx.stroke();
 			}
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
@@ -87,7 +129,60 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
-			setInterval(tick, SPEED);
+			// ==Movement==
+			function moveStars(stars) {
+					for (var f in forces) {
+					var force = forces[f];
+					var forceEnd = add(force.pos, force.vect);
+					for(var i in stars) {
+						var star = stars[i];
+						var d = distPointToSegment(star.pos, force.pos, forceEnd);
+						if (d < FORCE_DIST) {
+							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
+							if (force.vect.x) {
+								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+							}
+							if (force.vect.y) {
+								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+							}
+						}
+					}
+				}
+			}
+			function distPointToSegment(point, segStart, segEnd) {
+				var v = sub(segEnd, segStart);
+				var w = sub(point, segStart);
+				var c1 = dot(w,v);
+				if (c1 <= 0) {
+					return vDist(point, segStart);
+				}
+				var c2 = dot(v,v);
+				if (c2 <= c1) {
+					return vDist(point, segEnd);
+				}
+				var b = c1 / c2;
+				var pointB = add(segStart, vMulScalar(b, v));
+				return vDist(point, pointB);
+			}
+			// =Helper functions=
+			function dot(a, b) {
+				return a.x * b.x + a.y * b.y;
+			}
+			function norm(v) {
+				return Math.sqrt(dot(v,v));
+			}
+			function vDist(p1, p2) {
+				return norm(sub(p1, p2));
+			}
+			function add(a, b) {
+				return {x: a.x + b.x, y: a.y + b.y};
+			}
+			function sub(a, b) {
+				return {x: a.x - b.x, y: a.y - b.y};
+			}
+			function vMulScalar(s, v) {
+				return {x: v.x * s, y: v.y * s};
+			}
 		</script>
 	</body>
 </html>
