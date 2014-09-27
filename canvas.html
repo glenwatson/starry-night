@@ -11,40 +11,52 @@
 	<body>
 		<canvas id="space">No canvas support</canvas>
 		<script>
-			var SPEED = 500;
+			var SPEED = 10;
 			var NUM_STARS = 1000;
+			var FORCE_DIST = 200;
+			var FORCE_SCALE = 100
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
 			
 			var stars = [];
+			var forces = [];
 			//populate
 			for(var i=0; i<NUM_STARS; i++) {
 				stars.push({
-					x: Math.random() * canvas.width,
-					y: Math.random() * canvas.height,
+					pos: {
+						x: Math.random() * canvas.width,
+						y: Math.random() * canvas.height,
+					},
 					color: randomColor()
 				});
 			}	
-			
+			forces.push({pos: {x: 500, y: 500}, dir: {x: -10, y: 0}});
 			function tick() {
 				console.log('tick');
 				//move
 				for(var i in stars) {
 					var star = stars[i];
-					star.x--;
-					if (star.x < 0) {
-						star.x = canvas.width;
+						for (var f in forces) {
+						var force = forces[f];
+						var d = dist(star.pos, force.pos);
+						if (d < FORCE_DIST) {
+							star.pos.x += force.dir.x * (FORCE_DIST - d) / FORCE_SCALE;
+							star.pos.y += force.dir.y * (FORCE_DIST - d) / FORCE_SCALE;
+						}
 					}
 				}
 				drawBG();
 				drawStars(stars);
 			}
+			function dist(pos1, pos2) {
+				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
+			}
 			function drawStars(stars) {
 				for(var i in stars) {
 					ctx.fillStyle = stars[i].color;
-					drawStar(stars[i].x, stars[i].y, ctx);
+					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
 				}
 			}
 			function drawStar(x, y, ctx) {
