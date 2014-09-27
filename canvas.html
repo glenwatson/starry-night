@@ -14,7 +14,7 @@
 			var SPEED = 10;
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 200;
-			var FORCE_SCALE = 100
+			var DRAW_FORCES = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -31,8 +31,20 @@
 					},
 					color: randomColor()
 				});
-			}	
-			forces.push({pos: {x: 500, y: 500}, dir: {x: -10, y: 0}});
+			}
+			/*
+			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: 10}, strength: 10});
+			forces.push({pos: {x: 300, y: 300}, vect: {x: 10, y: 0}, strength: 10});
+			forces.push({pos: {x: 300, y: 300}, vect: {x: 0, y: -10}, strength: 10});
+			forces.push({pos: {x: 300, y: 300}, vect: {x: -10, y: 0}, strength: 10});
+			forces.push({pos: {x: 700, y: 700}, vect: {x: 0, y: 5}, strength: 10});
+			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
+			forces.push({pos: {x: 1200, y: 300}, vect: {x: 5, y: 5}, strength: 10});
+			*/
+			forces.push({pos: {x: 900, y: 300}, vect: {x: 0, y: 500}, strength: 1});
+			forces.push({pos: {x: 800, y: 200}, vect: {x: 500, y: 0}, strength: 1});
+			forces.push({pos: {x: 700, y: 300}, vect: {x: 0, y: -500}, strength: 1});
+			forces.push({pos: {x: 800, y: 400}, vect: {x: -500, y: 0}, strength: 1});
 			function tick() {
 				console.log('tick');
 				//move
@@ -42,13 +54,17 @@
 						var force = forces[f];
 						var d = dist(star.pos, force.pos);
 						if (d < FORCE_DIST) {
-							star.pos.x += force.dir.x * (FORCE_DIST - d) / FORCE_SCALE;
-							star.pos.y += force.dir.y * (FORCE_DIST - d) / FORCE_SCALE;
+							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
+							star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+							star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
 						}
 					}
 				}
 				drawBG();
 				drawStars(stars);
+				if (DRAW_FORCES) {
+					drawForces(forces);
+				}
 			}
 			function dist(pos1, pos2) {
 				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
@@ -65,8 +81,22 @@
 				ctx.fill();
 				ctx.closePath();
 			}
+			function drawForces(forces) {
+				ctx.strokeStyle = "#ffffff";
+				for(var i in forces) {
+					drawForce(forces[i], ctx);
+				}
+			}
+			function drawForce(force, ctx) {
+				ctx.lineWidth = force.strength/5;
+				ctx.beginPath();
+				ctx.moveTo(force.pos.x, force.pos.y);
+				ctx.lineTo(force.pos.x+force.vect.x, force.pos.y+force.vect.y);
+				ctx.stroke();
+				ctx.closePath();
+			}
 			function drawBG () {
-				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.fillStyle = "#000000";
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 			}
 			function randomColor() {
