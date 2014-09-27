@@ -45,25 +45,12 @@
 			forces.push({pos: {x: 800, y: 200}, vect: {x: 500, y: 0}, strength: 1});
 			forces.push({pos: {x: 700, y: 300}, vect: {x: 0, y: -500}, strength: 1});
 			forces.push({pos: {x: 800, y: 400}, vect: {x: -500, y: 0}, strength: 1});
+			
+			//start
+			setInterval(tick, SPEED);
 			function tick() {
 				console.log('tick');
-				//move
-				for(var i in stars) {
-					var star = stars[i];
-						for (var f in forces) {
-						var force = forces[f];
-						var d = dist(star.pos, force.pos);
-						if (d < FORCE_DIST) {
-							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
-							if (force.vect.x) {
-								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
-							}
-							if (force.vect.y) {
-								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
-							}
-						}
-					}
-				}
+				moveStars(stars);
 				drawBG();
 				drawStars(stars);
 				if (DRAW_FORCES) {
@@ -111,7 +98,60 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
-			setInterval(tick, SPEED);
+			// ==Movement==
+			function moveStars(stars) {
+					for (var f in forces) {
+					var force = forces[f];
+					var forceEnd = add(force.pos, force.vect);
+					for(var i in stars) {
+						var star = stars[i];
+						var d = distPointToSegment(star.pos, force.pos, forceEnd);
+						if (d < FORCE_DIST) {
+							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
+							if (force.vect.x) {
+								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+							}
+							if (force.vect.y) {
+								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+							}
+						}
+					}
+				}
+			}
+			function distPointToSegment(point, segStart, segEnd) {
+				var v = sub(segEnd, segStart);
+				var w = sub(point, segStart);
+				var c1 = dot(w,v);
+				if (c1 <= 0) {
+					return vDist(point, segStart);
+				}
+				var c2 = dot(v,v);
+				if (c2 <= c1) {
+					return vDist(point, segEnd);
+				}
+				var b = c1 / c2;
+				var pointB = add(segStart, vMulScalar(b, v));
+				return vDist(point, pointB);
+			}
+			// =Helper functions=
+			function dot(a, b) {
+				return a.x * b.x + a.y * b.y;
+			}
+			function norm(v) {
+				return Math.sqrt(dot(v,v));
+			}
+			function vDist(p1, p2) {
+				return norm(sub(p1, p2));
+			}
+			function add(a, b) {
+				return {x: a.x + b.x, y: a.y + b.y};
+			}
+			function sub(a, b) {
+				return {x: a.x - b.x, y: a.y - b.y};
+			}
+			function vMulScalar(s, v) {
+				return {x: v.x * s, y: v.y * s};
+			}
 		</script>
 	</body>
 </html>
