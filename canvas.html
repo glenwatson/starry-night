@@ -55,8 +55,12 @@
 						var d = dist(star.pos, force.pos);
 						if (d < FORCE_DIST) {
 							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
-							star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
-							star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+							if (force.vect.x) {
+								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+							}
+							if (force.vect.y) {
+								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+							}
 						}
 					}
 				}
@@ -93,7 +97,9 @@
 				ctx.moveTo(force.pos.x, force.pos.y);
 				ctx.lineTo(force.pos.x+force.vect.x, force.pos.y+force.vect.y);
 				ctx.stroke();
-				ctx.closePath();
+				ctx.beginPath();
+				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
+				ctx.stroke();
 			}
 			function drawBG () {
 				ctx.fillStyle = "#000000";
