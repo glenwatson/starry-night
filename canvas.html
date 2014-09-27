@@ -31,8 +31,18 @@
 					},
 					color: randomColor()
 				});
-			}	
-			forces.push({pos: {x: 500, y: 500}, dir: {x: -10, y: 0}});
+			}
+			forces.push({pos: {x: 300, y: 300}, dir: {x: 0, y: 10}});
+			forces.push({pos: {x: 300, y: 300}, dir: {x: 10, y: 0}});
+			forces.push({pos: {x: 300, y: 300}, dir: {x: 0, y: -10}});
+			forces.push({pos: {x: 300, y: 300}, dir: {x: -10, y: 0}});
+			forces.push({pos: {x: 700, y: 700}, dir: {x: 0, y: 5}});
+			forces.push({pos: {x: 1200, y: 300}, dir: {x: 5, y: 5}});
+			forces.push({pos: {x: 1200, y: 300}, dir: {x: 5, y: 5}});
+			forces.push({pos: {x: 1300, y: 700}, dir: {x: 0, y: 10}});
+			forces.push({pos: {x: 1200, y: 800}, dir: {x: 10, y: 0}});
+			forces.push({pos: {x: 1300, y: 900}, dir: {x: 0, y: -10}});
+			forces.push({pos: {x: 1400, y: 800}, dir: {x: -10, y: 0}});
 			function tick() {
 				console.log('tick');
 				//move
