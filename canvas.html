@@ -44,7 +44,6 @@
 			ctx.textAlign = "end";
 			
 			var stars = [];
-			var hiddenStars = [];
 			var forces = [];
 			//populate
 			for(var i=0; i<NUM_STARS; i++) {
@@ -54,7 +53,6 @@
 						y: Math.random() * canvas.height,
 					},
 					color: randomColor(),
-					hidden: false,
 				});
 			}
 			
@@ -95,10 +93,6 @@
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
 				}
-				while(s = hiddenStars.shift()) {
-					stars[s].pos = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
-					stars[s].hidden = false;
-				}
 			}
 			var fps = 0;
 			var frameCount = 0;
@@ -124,15 +118,8 @@
 			}
 			function drawStars(stars) {
 				for(var i in stars) {
-					if (!stars[i].hidden) {
-						if (isOutsideScreen(stars[i])) {
-							stars[i].hidden = true;
-							hiddenStars.push(i);
-						} else {
-							ctx.fillStyle = stars[i].color;
-							drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
-						}
-					}
+					ctx.fillStyle = stars[i].color;
+					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
 				}
 			}
 			function drawStar(x, y, ctx) {
@@ -183,9 +170,32 @@
 							if (force.vect.y) {
 								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
 							}
+							if (isOutsideScreen(star)) {
+								handleOffScreen(star);
+							}
 						}
 					}
 				}
+			}
+			//handleOffScreen = wrap;
+			handleOffScreen = randomizePos;
+			function wrap(star) {
+				if (star.pos.x < 0) {
+					star.pos.x = canvas.width;
+				}
+				if (star.pos.y < 0) {
+					star.pos.y = canvas.height;
+				}
+				if (star.pos.x > canvas.width) {
+					star.pos.x = 0;
+				}
+				if (star.pos.y > canvas.height) {
+					star.pos.y = 0;
+				}
+			}
+			function randomizePos(star) {
+				star.pos.x = Math.random() * canvas.width;
+				star.pos.y = Math.random() * canvas.height;
 			}
 			// http://geomalgorithms.com/a02-_lines.html
 			function distPointToSegment(point, segStart, segEnd) {
