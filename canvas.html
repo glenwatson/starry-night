@@ -27,6 +27,7 @@
 		<div id="settings">
 			<input onclick="DEBUG =! DEBUG;" type="checkbox" />
 			<input onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" />
+			<input onclick="forces=[];" type="checkbox" />
 		</div>
 		<script>
 			var ANIMATION_FRAME = false;
@@ -57,10 +58,17 @@
 				});
 			}
 			
-			forces.push({pos: {x: 0, y: 0}, vect: {x: 1500, y: 0}, strength: 10});
-			forces.push({pos: {x: 0, y: 300}, vect: {x: 1500, y: 0}, strength: 10});
-			forces.push({pos: {x: 0, y: 600}, vect: {x: 1500, y: 0}, strength: 10});
-			forces.push({pos: {x: 0, y: 900}, vect: {x: 1500, y: 0}, strength: 10});
+			var mouseDownPoint={x:0, y:0};
+			canvas.onmousedown = function (e) {
+				mouseDownPoint = {x: e.clientX, y: e.clientY};
+			}
+			canvas.onmouseup = function (e) {
+				forces.push({
+					pos: mouseDownPoint, 
+					vect: sub({x: e.clientX, y: e.clientY}, mouseDownPoint), 
+					strength: 5
+				});
+			}
 			
 			//start
 			start();
