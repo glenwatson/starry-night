@@ -15,16 +15,26 @@
 				left: 0;
 				top: 0;
 			}
+			#settings {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
+		<div id="settings">
+			<input onclick="DEBUG =! DEBUG;" type="checkbox" />
+			<input onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" />
+		</div>
 		<script>
 			var ANIMATION_FRAME = false;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 200;
 			var DEBUG = true;
+			var CLEAR_ON_DRAW = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -65,7 +75,9 @@
 			}
 			function tick() {
 				moveStars(stars);
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				if (CLEAR_ON_DRAW) {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+				}
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
@@ -75,8 +87,7 @@
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
 				}
-				var s = hiddenStars.shift();
-				if (s) {
+				while(s = hiddenStars.shift()) {
 					stars[s].pos = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
 					stars[s].hidden = false;
 				}
