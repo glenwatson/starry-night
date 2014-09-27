@@ -15,16 +15,26 @@
 				left: 0;
 				top: 0;
 			}
+			#settings {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
+		<div id="settings">
+			<input onclick="DEBUG =! DEBUG;" type="checkbox" />
+			<input onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" />
+		</div>
 		<script>
 			var ANIMATION_FRAME = false;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
-			var FORCE_DIST = 500;
+			var FORCE_DIST = 700;
 			var DEBUG = true;
+			var CLEAR_ON_DRAW = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -33,6 +43,7 @@
 			ctx.textAlign = "end";
 			
 			var stars = [];
+			var hiddenStars = [];
 			var forces = [];
 			//populate
 			for(var i=0; i<NUM_STARS; i++) {
@@ -41,14 +52,21 @@
 						x: Math.random() * canvas.width,
 						y: Math.random() * canvas.height,
 					},
-					color: randomColor()
+					color: randomColor(),
+					hidden: false,
 				});
 			}
 			
-			forces.push({pos: {x: 100, y: 200}, vect: {x: 100, y: 200}, strength: 5});
-			forces.push({pos: {x: 1400, y: 800}, vect: {x: -100, y: -200}, strength: 5});
-			forces.push({pos: {x: 400, y: 950}, vect: {x: 200, y: -100}, strength: 5});
-			forces.push({pos: {x: 1100, y: 50}, vect: {x: -200, y: 100}, strength: 5});
+			/*
+			forces.push({pos: {x: 500, y: 200}, vect: {x: 400, y: 0}, strength: 5});
+			forces.push({pos: {x: 1000, y: 800}, vect: {x: -400, y: 0}, strength: 5});
+			forces.push({pos: {x: 1100, y: 300}, vect: {x: 0, y: 400}, strength: 5});
+			forces.push({pos: {x: 400, y: 700}, vect: {x: 0, y: -400}, strength: 5});
+			*/
+			forces.push({pos: {x: 500, y: 400}, vect: {x: 400, y: 0}, strength: 5});
+			forces.push({pos: {x: 900, y: 700}, vect: {x: -400, y: 0}, strength: 5});
+			forces.push({pos: {x: 900, y: 400}, vect: {x: 0, y: 300}, strength: 5});
+			forces.push({pos: {x: 500, y: 700}, vect: {x: 0, y: -300}, strength: 5});
 			//start
 			start();
 			
@@ -62,7 +80,9 @@
 			}
 			function tick() {
 				moveStars(stars);
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				if (CLEAR_ON_DRAW) {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+				}
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
@@ -71,6 +91,10 @@
 				}
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
+				}
+				while(s = hiddenStars.shift()) {
+					stars[s].pos = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
+					stars[s].hidden = false;
 				}
 			}
 			var fps = 0;
@@ -97,8 +121,15 @@
 			}
 			function drawStars(stars) {
 				for(var i in stars) {
-					ctx.fillStyle = stars[i].color;
-					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
+					if (!stars[i].hidden) {
+						if (isOutsideScreen(stars[i])) {
+							stars[i].hidden = true;
+							hiddenStars.push(i);
+						} else {
+							ctx.fillStyle = stars[i].color;
+							drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
+						}
+					}
 				}
 			}
 			function drawStar(x, y, ctx) {
@@ -129,6 +160,10 @@
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
+			function isOutsideScreen(star) {
+				return star.pos.x < 0 || star.pos.y < 0 ||
+					star.pos.x > canvas.width || star.pos.y > canvas.height;
+			}
 			// ==Movement==
 			function moveStars(stars) {
 					for (var f in forces) {
@@ -149,6 +184,7 @@
 					}
 				}
 			}
+			// http://geomalgorithms.com/a02-_lines.html
 			function distPointToSegment(point, segStart, segEnd) {
 				var v = sub(segEnd, segStart);
 				var w = sub(point, segStart);
