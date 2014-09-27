@@ -11,15 +11,17 @@
 	<body>
 		<canvas id="space">No canvas support</canvas>
 		<script>
-			var SPEED = 10;
+			var SPEED = 1; // 30fps
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 200;
-			var DRAW_FORCES = true;
+			var DEBUG = true;
 			var DRAW_BG = true;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
+			ctx.font = "8pt Arial";
+			ctx.textAlign = "end";
 			
 			var stars = [];
 			var forces = [];
@@ -59,9 +61,30 @@
 					drawBG();
 				}
 				drawStars(stars);
-				if (DRAW_FORCES) {
+				if (DEBUG) {
 					drawForces(forces);
+					drawFramerate();
+					drawFps();
 				}
+			}
+			var fps = 0;
+			var frameCount = 0;
+			function drawFps() {
+				frameCount++;
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText(fps+" fps", canvas.width-10, 20);
+			}
+			setInterval(function() {
+				fps = frameCount;
+				frameCount = 0;
+			}, 1000);
+			
+			var lastFrame = new Date().getTime();
+			function drawFramerate() {
+				var thisFrame = new Date().getTime();
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+				lastFrame = thisFrame;
 			}
 			function dist(pos1, pos2) {
 				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
