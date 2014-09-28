@@ -41,6 +41,8 @@
 			handleOffScreen = randomizePos; //wrap;
 			getColor = rainbowColor; //randomColor;
 			getPos = xSpreadPos; //randomPos;
+			var recolor = rainbowColor;
+			
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -51,26 +53,11 @@
 			var stars = [];
 			var forces = [];
 			//populate
-			function populateStars(count) {
-				for(var i=0; i<count; i++) {
-					var star = {};
-					star.pos = getPos(i, count);
-					star.color = getColor(i, count, star);
-					stars.push(star);
-				}
-			}
-			populateStars(NUM_STARS);
-			function randomPos() {
-				return {
-					x: Math.random() * canvas.width,
-					y: Math.random() * canvas.height,
-				};
-			}
-			function xSpreadPos(i, totalCount) {
-				return {
-					x: (i / totalCount) * canvas.width,
-					y: Math.random() * canvas.height,
-				};
+			for(var i=0; i<NUM_STARS; i++) {
+				var star = {};
+				star.pos = getPos(i, NUM_STARS);
+				star.color = getColor(i, NUM_STARS, star);
+				stars.push(star);
 			}
 			
 			// =mouse clicks=
@@ -91,19 +78,23 @@
 				}
 			})();
 			
-			//start
-			start();
-			
-			function start() {
+			//=start=
+			;(function() {
 				if (ANIMATION_FRAME && window.requestAnimationFrame) {
 					tick();
 				} else {
 					ANIMATION_FRAME = false;
 					setInterval(tick, SPEED);
 				}
-			}
+			})();
+			
 			function tick() {
 				moveStars(stars);
+				if (recolor) {
+					for(var i in stars) {
+						stars[i].color = recolor(i, NUM_STARS, stars[i]);
+					}
+				}
 				if (CLEAR_ON_DRAW) {
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 				}
@@ -117,28 +108,8 @@
 					requestAnimationFrame(tick);
 				}
 			}
-			var fps = 0;
-			var frameCount = 0;
-			function drawFps() {
-				frameCount++;
-				ctx.fillStyle = "#ffffff";
-				ctx.fillText(fps+" fps", canvas.width-10, 20);
-			}
-			setInterval(function() {
-				fps = frameCount;
-				frameCount = 0;
-			}, 1000);
 			
-			var lastFrame = new Date().getTime();
-			function drawFramerate() {
-				var thisFrame = new Date().getTime();
-				ctx.fillStyle = "#ffffff";
-				ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
-				lastFrame = thisFrame;
-			}
-			function dist(pos1, pos2) {
-				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
-			}
+			// ==rendering==
 			function drawStars(stars) {
 				for(var i in stars) {
 					ctx.fillStyle = stars[i].color;
@@ -166,6 +137,44 @@
 				ctx.beginPath();
 				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
 				ctx.stroke();
+			}
+			// =fps=
+			var drawFps = (function() {
+				var fps = 0;
+				var frameCount = 0;
+				setInterval(function() {
+					fps = frameCount;
+					frameCount = 0;
+				}, 1000); //1 second
+				return function() {
+					frameCount++;
+					ctx.fillStyle = "#ffffff";
+					ctx.fillText(fps+" fps", canvas.width-10, 20);
+				}
+			})();
+			
+			// =framerate=
+			var drawFramerate = (function() {
+				var lastFrame = new Date().getTime();
+				return function() {
+					var thisFrame = new Date().getTime();
+					ctx.fillStyle = "#ffffff";
+					ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+					lastFrame = thisFrame;
+				}
+			})();
+			
+			function randomPos() {
+				return {
+					x: Math.random() * canvas.width,
+					y: Math.random() * canvas.height,
+				};
+			}
+			function xSpreadPos(i, totalCount) {
+				return {
+					x: (i / totalCount) * canvas.width,
+					y: Math.random() * canvas.height,
+				};
 			}
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
