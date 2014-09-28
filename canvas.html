@@ -33,7 +33,7 @@
 			var ANIMATION_FRAME = false;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
-			var FORCE_DIST = 200;
+			var FORCE_DIST = 40;
 			var DEBUG = true;
 			var CLEAR_ON_DRAW = true;
 			var canvas = document.getElementById('space');
@@ -162,13 +162,16 @@
 					for(var i in stars) {
 						var star = stars[i];
 						var d = distPointToSegment(star.pos, force.pos, forceEnd);
-						if (d < FORCE_DIST) {
-							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
+						var forceReach = force.strength * FORCE_DIST;
+						if (d < forceReach) {
+							var pull = force.strength * (forceReach - d) / forceReach;
+							var magnitude = norm(force.vect);
+							var unitVect = vMulScalar(1/magnitude, force.vect);
 							if (force.vect.x) {
-								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+								star.pos.x += pull * unitVect.x;
 							}
 							if (force.vect.y) {
-								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+								star.pos.y += pull * unitVect.y;
 							}
 							if (isOutsideScreen(star)) {
 								handleOffScreen(star);
