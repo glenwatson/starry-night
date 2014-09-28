@@ -36,6 +36,9 @@
 			var FORCE_DIST = 40;
 			var DEBUG = true;
 			var CLEAR_ON_DRAW = true;
+			handleOffScreen = randomizePos; //wrap;
+			getColor = rainbowColor; //randomColor;
+			getPos = xSpreadPos; //randomPos;
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -46,27 +49,45 @@
 			var stars = [];
 			var forces = [];
 			//populate
-			for(var i=0; i<NUM_STARS; i++) {
-				stars.push({
-					pos: {
-						x: Math.random() * canvas.width,
-						y: Math.random() * canvas.height,
-					},
-					color: randomColor(),
-				});
+			function populateStars(count) {
+				for(var i=0; i<count; i++) {
+					var star = {};
+					star.pos = getPos(i, count);
+					star.color = getColor(i, count, star);
+					stars.push(star);
+				}
+			}
+			populateStars(NUM_STARS);
+			function randomPos() {
+				return {
+					x: Math.random() * canvas.width,
+					y: Math.random() * canvas.height,
+				};
+			}
+			function xSpreadPos(i, totalCount) {
+				return {
+					x: (i / totalCount) * canvas.width,
+					y: Math.random() * canvas.height,
+				};
 			}
 			
-			var mouseDownPoint={x:0, y:0};
-			canvas.onmousedown = function (e) {
-				mouseDownPoint = {x: e.clientX, y: e.clientY};
-			}
-			canvas.onmouseup = function (e) {
-				forces.push({
-					pos: mouseDownPoint, 
-					vect: sub({x: e.clientX, y: e.clientY}, mouseDownPoint), 
-					strength: 5
-				});
-			}
+			// =mouse clicks=
+			;(function() {
+				var mouseDownPoint={x:0, y:0};
+				canvas.onmousedown = function (e) {
+					mouseDownPoint = {x: e.clientX, y: e.clientY};
+				}
+				canvas.onmouseup = function (e) {
+					var mouseUpPoint = {x: e.clientX, y: e.clientY};
+					if (!eq(mouseDownPoint, mouseUpPoint)) {
+						forces.push({
+							pos: mouseDownPoint, 
+							vect: sub(mouseUpPoint, mouseDownPoint), 
+							strength: 5
+						});
+					}
+				}
+			})();
 			
 			//start
 			start();
@@ -147,6 +168,9 @@
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
 			}
+			function rainbowColor(i, total) {
+				return "hsl("+(i / total * 360)+", 100%, 50%)";
+			}
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
@@ -180,8 +204,6 @@
 					}
 				}
 			}
-			//handleOffScreen = wrap;
-			handleOffScreen = randomizePos;
 			function wrap(star) {
 				if (star.pos.x < 0) {
 					star.pos.x = canvas.width;
@@ -234,6 +256,9 @@
 			}
 			function vMulScalar(s, v) {
 				return {x: v.x * s, y: v.y * s};
+			}
+			function eq(a, b) {
+				return a.x == b.x && a.y == b.y;
 			}
 		</script>
 	</body>
