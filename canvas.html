@@ -43,7 +43,7 @@
 			var handleOffScreen = randomizePos; //wrap;
 			var getColor = rainbowColor; //randomColor;
 			var getPos = xSpreadPos; //randomPos;
-			var recolor = rainbowColorPos;
+			var recolor = recolorPos;
 			
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
@@ -178,14 +178,29 @@
 					y: Math.random() * canvas.height,
 				};
 			}
+			// =color=
 			function randomColor() {
 				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
 			}
 			function rainbowColor(i, total) {
 				return "hsl("+(i / total * 360)+", 100%, 50%)";
 			}
-			function rainbowColorPos(i, total, star) {
-				return "hsl("+(star.pos.x / canvas.width * 360)+", 100%, 50%)";
+			function recolorPos(i, total, star) {
+				return "hsl("+huePos(star)+", 100%, "+lightnessSparkle(star)+"%)";
+			}
+			function huePos(star) {
+				return star.pos.x / canvas.width * 360;
+			}
+			function lightnessSparkle(star) {
+				if (typeof star.brightness == 'undefined') {
+					star.brightness = Math.random() * Math.PI;
+					console.log('random');
+				} else if (star.brightness > Math.PI) {
+					star.brightness = 0;
+				} else {
+					star.brightness += 0.05;
+				}
+				return Math.round(Math.sin(star.brightness)*100);
 			}
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
