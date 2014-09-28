@@ -37,12 +37,13 @@
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 40;
-			var DEBUG = true;
+			var DEBUG = false;
 			var CLEAR_ON_DRAW = true;
 			// =template methods=
-			var handleOffScreen = randomizePos; //wrap;
-			var getColor = rainbowColor; //randomColor;
-			var getPos = xSpreadPos; //randomPos;
+			var noop = function(){};
+			var handleOffScreen = noop; //randomizePos; //wrap;
+			var getColor = randomColor; //rainbowColor;
+			var getPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var recolor = recolorPos;
 			
 			var canvas = document.getElementById('space');
@@ -165,7 +166,7 @@
 					lastFrame = thisFrame;
 				}
 			})();
-			
+			// =pos=
 			function randomPos() {
 				return {
 					x: Math.random() * canvas.width,
@@ -177,6 +178,19 @@
 					x: (i / totalCount) * canvas.width,
 					y: Math.random() * canvas.height,
 				};
+			}
+			function gridPos(i, totalCount) {
+				var val = i / totalCount * canvas.width * canvas.height;
+				return {
+					x: val % canvas.width,
+					y: val / canvas.height,
+				};
+			}
+			function resetOrigPos() {
+				var pos = randomPos();
+				pos.xOrig = pos.x;
+				pos.yOrig = pos.y;
+				return pos;
 			}
 			// =color=
 			function randomColor() {
@@ -192,15 +206,17 @@
 				return star.pos.x / canvas.width * 360;
 			}
 			function lightnessSparkle(star) {
+				var OSCILLATION_SPEED =  0.02;
 				if (typeof star.brightness == 'undefined') {
 					star.brightness = Math.random() * Math.PI;
-					console.log('random');
 				} else if (star.brightness > Math.PI) {
 					star.brightness = 0;
+					star.pos.x = star.pos.xOrig;
+					star.pos.y = star.pos.yOrig;
 				} else {
-					star.brightness += 0.05;
+					star.brightness += OSCILLATION_SPEED;
 				}
-				return Math.round(Math.sin(star.brightness)*100);
+				return Math.round(Math.sin(star.brightness)*90);
 			}
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
