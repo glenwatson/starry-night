@@ -32,16 +32,18 @@
 			<input onclick="forces=[];" type="checkbox" />
 		</div>
 		<script>
+			// =settings=
 			var ANIMATION_FRAME = false;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 40;
 			var DEBUG = true;
 			var CLEAR_ON_DRAW = true;
-			handleOffScreen = randomizePos; //wrap;
-			getColor = rainbowColor; //randomColor;
-			getPos = xSpreadPos; //randomPos;
-			var recolor = rainbowColor;
+			// =template methods=
+			var handleOffScreen = randomizePos; //wrap;
+			var getColor = rainbowColor; //randomColor;
+			var getPos = xSpreadPos; //randomPos;
+			var recolor = rainbowColorPos;
 			
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
@@ -53,7 +55,7 @@
 			var stars = [];
 			var forces = [];
 			//populate
-			for(var i=0; i<NUM_STARS; i++) {
+			for (var i=0; i<NUM_STARS; i++) {
 				var star = {};
 				star.pos = getPos(i, NUM_STARS);
 				star.color = getColor(i, NUM_STARS, star);
@@ -91,7 +93,7 @@
 			function tick() {
 				moveStars(stars);
 				if (recolor) {
-					for(var i in stars) {
+					for (var i in stars) {
 						stars[i].color = recolor(i, NUM_STARS, stars[i]);
 					}
 				}
@@ -111,7 +113,7 @@
 			
 			// ==rendering==
 			function drawStars(stars) {
-				for(var i in stars) {
+				for (var i in stars) {
 					ctx.fillStyle = stars[i].color;
 					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
 				}
@@ -124,7 +126,7 @@
 			}
 			function drawForces(forces) {
 				ctx.strokeStyle = "#ffffff";
-				for(var i in forces) {
+				for (var i in forces) {
 					drawForce(forces[i], ctx);
 				}
 			}
@@ -182,6 +184,9 @@
 			function rainbowColor(i, total) {
 				return "hsl("+(i / total * 360)+", 100%, 50%)";
 			}
+			function rainbowColorPos(i, total, star) {
+				return "hsl("+(star.pos.x / canvas.width * 360)+", 100%, 50%)";
+			}
 			function randomHex() {
 				return Math.round(Math.random() * 16).toString(16);
 			}
@@ -194,7 +199,7 @@
 					for (var f in forces) {
 					var force = forces[f];
 					var forceEnd = add(force.pos, force.vect);
-					for(var i in stars) {
+					for (var i in stars) {
 						var star = stars[i];
 						var d = distPointToSegment(star.pos, force.pos, forceEnd);
 						var forceReach = force.strength * FORCE_DIST;
