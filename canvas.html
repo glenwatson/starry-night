@@ -33,7 +33,7 @@
 		</div>
 		<script>
 			// =settings=
-			var ANIMATION_FRAME = false;
+			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 40;
@@ -41,10 +41,11 @@
 			var CLEAR_ON_DRAW = true;
 			// =template methods=
 			var noop = function(){};
-			var handleOffScreen = noop; //randomizePos; //wrap;
-			var getColor = randomColor; //rainbowColor;
-			var getPos = resetOrigPos; //xSpreadPos; //randomPos;
+			var handleOffScreen = randomizePos; //wrap;
+			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
+			var getInitColor = randomColor; //rainbowColor;
 			var recolor = recolorPos;
+			var moveStars = moveStart; //moveLength;
 			
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
@@ -58,8 +59,8 @@
 			//populate
 			for (var i=0; i<NUM_STARS; i++) {
 				var star = {};
-				star.pos = getPos(i, NUM_STARS);
-				star.color = getColor(i, NUM_STARS, star);
+				star.pos = getInitPos(i, NUM_STARS);
+				star.color = getInitColor(i, NUM_STARS, star);
 				stars.push(star);
 			}
 			
@@ -75,7 +76,7 @@
 						forces.push({
 							pos: mouseDownPoint, 
 							vect: sub(mouseUpPoint, mouseDownPoint), 
-							strength: 5
+							strength: Math.random() * 5 + 3
 						});
 					}
 				}
@@ -92,7 +93,7 @@
 			})();
 			
 			function tick() {
-				moveStars(stars);
+				moveStars(stars, forces);
 				if (recolor) {
 					for (var i in stars) {
 						stars[i].color = recolor(i, NUM_STARS, stars[i]);
@@ -194,7 +195,7 @@
 			}
 			// =color=
 			function randomColor() {
-				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
+				return "#"+Math.round(Math.random() * Math.pow(16, 6)).toString(16);
 			}
 			function rainbowColor(i, total) {
 				return "hsl("+(i / total * 360)+", 100%, 50%)";
@@ -218,16 +219,13 @@
 				}
 				return Math.round(Math.sin(star.brightness)*90);
 			}
-			function randomHex() {
-				return Math.round(Math.random() * 16).toString(16);
-			}
 			function isOutsideScreen(star) {
 				return star.pos.x < 0 || star.pos.y < 0 ||
 					star.pos.x > canvas.width || star.pos.y > canvas.height;
 			}
 			// ==Movement==
-			function moveStars(stars) {
-					for (var f in forces) {
+			function moveLength(stars, forces) {
+				for (var f in forces) {
 					var force = forces[f];
 					var forceEnd = add(force.pos, force.vect);
 					for (var i in stars) {
@@ -251,6 +249,31 @@
 					}
 				}
 			}
+			function moveStart(stars, forces) {
+				for (var f in forces) {
+					var force = forces[f];
+					for (var i in stars) {
+						var star = stars[i];
+						var d = dist(star.pos, force.pos);
+						var forceReach = force.strength * FORCE_DIST;
+						if (d < forceReach) {
+							var pull = force.strength * (forceReach - d) / forceReach;
+							var magnitude = norm(force.vect);
+							var unitVect = vMulScalar(1/magnitude, force.vect);
+							if (force.vect.x) {
+								star.pos.x += pull * unitVect.x;
+							}
+							if (force.vect.y) {
+								star.pos.y += pull * unitVect.y;
+							}
+							if (isOutsideScreen(star)) {
+								handleOffScreen(star);
+							}
+						}
+					}
+				}
+			}
+			// =off screen=
 			function wrap(star) {
 				if (star.pos.x < 0) {
 					star.pos.x = canvas.width;
@@ -268,6 +291,9 @@
 			function randomizePos(star) {
 				star.pos.x = Math.random() * canvas.width;
 				star.pos.y = Math.random() * canvas.height;
+			}
+			function dist(pos1, pos2) {
+				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 			}
 			// http://geomalgorithms.com/a02-_lines.html
 			function distPointToSegment(point, segStart, segEnd) {
