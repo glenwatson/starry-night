@@ -41,7 +41,7 @@
 			var CLEAR_ON_DRAW = true;
 			// =template methods=
 			var noop = function(){};
-			var handleOffScreen = randomizePos; //wrap;
+			var handleOffScreen = randomFadeIn; //randomizePos; //wrap;
 			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var getInitColor = randomColor; //rainbowColor;
 			var recolor = recolorPos;
@@ -291,6 +291,10 @@
 			function randomizePos(star) {
 				star.pos.x = Math.random() * canvas.width;
 				star.pos.y = Math.random() * canvas.height;
+			}
+			function randomFadeIn(star) {
+				randomizePos(star);
+				star.brightness = 0;
 			}
 			function dist(pos1, pos2) {
 				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
