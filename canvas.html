@@ -68,16 +68,20 @@
 			;(function() {
 				var mouseDownPoint={x:0, y:0};
 				canvas.onmousedown = function (e) {
-					mouseDownPoint = {x: e.clientX, y: e.clientY};
+					if (e.which == 1) {
+						mouseDownPoint = {x: e.clientX, y: e.clientY};
+					}
 				}
 				canvas.onmouseup = function (e) {
-					var mouseUpPoint = {x: e.clientX, y: e.clientY};
-					if (!eq(mouseDownPoint, mouseUpPoint)) {
-						forces.push({
-							pos: mouseDownPoint, 
-							vect: sub(mouseUpPoint, mouseDownPoint), 
-							strength: Math.random() * 5 + 3
-						});
+					if (e.which == 1) {
+						var mouseUpPoint = {x: e.clientX, y: e.clientY};
+						if (!eq(mouseDownPoint, mouseUpPoint)) {
+							forces.push({
+								pos: mouseDownPoint, 
+								vect: sub(mouseUpPoint, mouseDownPoint), 
+								strength: Math.random() * 5 + 3
+							});
+						}
 					}
 				}
 			})();
