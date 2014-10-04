@@ -2,6 +2,8 @@
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<title>Stars</title>
+		<link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+		
 		<style>
 			html, body {
 				width: 100%;
@@ -10,26 +12,72 @@
 				padding: 0;
 			}
 			body {
-				background-color: #000000
+				font-family: 'Montserrat', sans-serif;
+				background-color: #000;
 			}
 			canvas {
 				position: absolute;
 				left: 0;
 				top: 0;
 			}
-			#settings {
+			
+			#options {
 				position: absolute;
-				right: 0;
+				left: 0;
 				bottom: 0;
+				margin: 5px;
+				width: 15px;
+				height: 15px;
+			}
+			#optionsPanel {
+				position: relative;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 20%;
+				padding: 23px;
+				width: 500px;
+				height: 40%;
+				background-color: #777;
+				border-radius: 25px;
+			}
+			.optionsRow {
+				padding-top: 7px;
+				width: 200px;
+				clear: both;
+			}
+			.optionsCell {
+				float: left;
+				width: 100px;
+			}
+			#optionsContainer {
+				width: 200px;
+			}
+			#optionsClose {
+				position: absolute;
+				top: 15;
+				right: 15;
+				cursor: pointer;
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
-		<div id="settings">
-			<input onclick="DEBUG =! DEBUG;" type="checkbox" />
-			<input onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" />
-			<input onclick="forces=[];" type="checkbox" />
+		<img id="options" onmouseover="showOptions();" src="gear512.png" />
+		<div id="optionsPanel" style="display:none;" >
+			<div id="optionsContainer" >
+				<div class="optionsRow">
+					<div class="optionsCell">Redraw</div>
+					<div class="optionsCell"><input id="redraw" onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" checked="checked" /></div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Debug</div>
+					<div class="optionsCell"><input id="debug" onclick="DEBUG =! DEBUG;" type="checkbox" /></div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
+				</div>
+			</div>
+			<div id="optionsClose" onclick="hideOptions();" >X</div>
 		</div>
 		<script>
 			// =settings=
@@ -37,8 +85,8 @@
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 40;
-			var DEBUG = false;
-			var CLEAR_ON_DRAW = true;
+			var DEBUG = document.getElementById('debug').checked;
+			var CLEAR_ON_DRAW = document.getElementById('redraw').checked;
 			// =template methods=
 			var noop = function(){};
 			var handleOffScreen = randomFadeIn; //randomizePos; //wrap;
@@ -86,15 +134,12 @@
 				}
 			})();
 			
-			//=start=
-			;(function() {
-				if (ANIMATION_FRAME && window.requestAnimationFrame) {
-					tick();
-				} else {
-					ANIMATION_FRAME = false;
-					setInterval(tick, SPEED);
-				}
-			})();
+			function showOptions() {
+				document.getElementById('optionsPanel').style.display = 'block';
+			}
+			function hideOptions() {
+				document.getElementById('optionsPanel').style.display = 'none';
+			}
 			
 			function tick() {
 				moveStars(stars, forces);
@@ -341,6 +386,15 @@
 			function eq(a, b) {
 				return a.x == b.x && a.y == b.y;
 			}
+			//	=start=
+			;(function() {
+				if (ANIMATION_FRAME && window.requestAnimationFrame) {
+					tick();
+				} else {
+					ANIMATION_FRAME = false;
+					setInterval(tick, SPEED);
+				}
+			})();
 		</script>
 	</body>
 </html>
