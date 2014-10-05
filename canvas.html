@@ -241,6 +241,14 @@
 						//decrease strength
 						setStrength(STRENGTH-1);
 					}
+					// left bracket: 91
+					if (e.keyCode == 91) {
+						setNumStars(NUM_STARS-10);
+					}
+					//right bracket: 93
+					if (e.keyCode == 93) {
+						setNumStars(NUM_STARS+10);
+					}
 				};
 			})();
 			
@@ -255,7 +263,7 @@
 				DEBUG = bool;
 			}
 			function setStrength(num) {
-				if (isNaN(num)) {
+				if (isNaN(num) || num < 0) {
 					num = STRENGTH;
 				}
 				document.getElementById('strength').value = num;
@@ -266,7 +274,7 @@
 				CLEAR_ON_DRAW = bool;
 			}
 			function setNumStars(num) {
-				if (isNaN(num)) {
+				if (isNaN(num) || num < 0) {
 					num = NUM_STARS;
 				}
 				document.getElementById('stars').value = num;
@@ -274,7 +282,7 @@
 				updateStarCount();
 			}
 			function setForceDist(num) {
-				if (isNaN(num)) {
+				if (isNaN(num) || num < 0) {
 					num = FORCE_DIST;
 				}
 				document.getElementById('forceDist').value = num;
