@@ -54,6 +54,9 @@
 				float: left;
 				width: 150px;
 			}
+			.optionsCell.double {
+				width: 300px;
+			}
 			#optionsContainer {
 				width: 200px;
 			}
@@ -109,10 +112,16 @@
 					<div class="optionsCell">&lt; &gt;</div>
 				</div>
 				<div class="optionsRow">
-					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
+					<div class="optionsCell double"><button onclick="stars=[]; updateStarCount();">New stars</button></div>
+					<div class="optionsCell">n</div>
 				</div>
 				<div class="optionsRow">
-					<div class="optionsCell"><button onclick="refreshUrl();">Save as URL</button></div>
+					<div class="optionsCell double" ><button onclick="forces=[];">Clear Forces</button></div>
+					<div class="optionsCell">c</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell double"><button onclick="refreshUrl();">Save as URL</button></div>
+					<div class="optionsCell">s</div>
 				</div>
 			</div>
 			<div id="optionsClose" onclick="hideOptions();" >X</div>
@@ -259,6 +268,16 @@
 						case 93: //right bracket (])
 							//increase force distance
 							setForceDist(FORCE_DIST+5);
+							break;
+						case 99: // c
+							forces = [];
+							break;
+						case 110: // n
+							stars = [];
+							updateStarCount();
+							break;
+						case 115: // s
+							refreshUrl();
 							break;
 					}
 					
