@@ -87,15 +87,15 @@
 			<div id="optionsContainer" >
 				<div class="optionsRow">
 					<div class="optionsCell">Redraw</div>
-					<div class="optionsCell"><input id="redraw" onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell"><input id="redraw" onclick="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
-					<div class="optionsCell"><input id="debug" onclick="DEBUG =! DEBUG;" type="checkbox" /></div>
+					<div class="optionsCell"><input id="debug" onclick="setDebug(this.checked);" type="checkbox" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Strength</div>
-					<div class="optionsCell"><input id="strength" onclick=";" type="text" value="5" size="1" /></div>
+					<div class="optionsCell"><input id="strength" onclick="setStrength(this.checked);" type="text" value="5" size="1" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
@@ -112,16 +112,17 @@
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var NUM_STARS = 1000;
 			var FORCE_DIST = 40;
-			var DEBUG = document.getElementById('debug').checked;
-			var CLEAR_ON_DRAW = document.getElementById('redraw').checked;
+			var DEBUG;
+			var CLEAR_ON_DRAW;
+			var STRENGTH;
 			// =template methods=
 			var noop = function(){};
 			var handleOffScreen = randomFadeIn; //randomizePos; //wrap;
 			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var getInitColor = randomColor; //rainbowColor;
-			var recolor = recolorPos;
-			var moveStars = moveStart; //moveLength;
-			
+			var recolor = undefined; //recolorPos;
+			var moveStars = moveLength; //moveRadius; //moveLength;
+			// =canvas=
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -132,6 +133,9 @@
 			var stars = [];
 			var forces = [];
 			loadUrl();
+			setDebug(false);
+			setRedraw(true);
+			setStrength(5);
 			
 			//populate
 			for (var i=0; i<NUM_STARS; i++) {
@@ -171,16 +175,12 @@
 				};
 				canvas.onmouseup = function (e) {
 					if (e.which == 1) {
-						var strength = parseInt(document.getElementById('strength').value);
-						if (isNaN(strength)) {
-							strength = 5;
-						}
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (!eq(mouseDownPoint, mouseUpPoint)) {
 							forces.push({
 								pos: mouseDownPoint, 
 								vect: sub(mouseUpPoint, mouseDownPoint), 
-								strength: strength
+								strength: STRENGTH
 							});
 						}
 					}
@@ -197,18 +197,12 @@
 					//      plus(+): 43      equals(=): 61 (if they didn't hold shift)
 					if (e.keyCode == 43 || e.keyCode == 61) {
 						//increase strength
-						var strength = parseInt(document.getElementById('strength').value);
-						if (!isNaN(strength)) {
-							document.getElementById('strength').value = strength+1;
-						}
+						setStrength(STRENGTH+1);
 					}
 					//     minus(-): 45
 					if (e.keyCode == 45) {
 						//decrease strength
-						var strength = parseInt(document.getElementById('strength').value);
-						if (!isNaN(strength) && strength > 1) {
-							document.getElementById('strength').value = strength-1;
-						}
+						setStrength(STRENGTH-1);
 					}
 				};
 			})();
@@ -218,6 +212,21 @@
 			}
 			function hideOptions() {
 				document.getElementById('optionsPanel').style.display = 'none';
+			}
+			function setDebug(bool) {
+				document.getElementById('debug').checked = bool;
+				DEBUG = bool;
+			}
+			function setStrength(num) {
+				if (isNaN(num)) {
+					num = 5;
+				}
+				document.getElementById('strength').value = num;
+				STRENGTH = num;
+			}
+			function setRedraw(bool) {
+				document.getElementById('redraw').checked = bool;
+				CLEAR_ON_DRAW = bool;
 			}
 			
 			function tick() {
@@ -377,7 +386,7 @@
 					}
 				}
 			}
-			function moveStart(stars, forces) {
+			function moveRadius(stars, forces) {
 				for (var f in forces) {
 					var force = forces[f];
 					for (var i in stars) {
