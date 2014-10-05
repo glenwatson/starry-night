@@ -136,6 +136,7 @@
 				stars.push(star);
 			}
 			
+			// ==events==
 			// =mouse clicks=
 			;(function() {
 				var mouseDownPoint={x:0, y:0};
@@ -143,7 +144,7 @@
 					if (e.which == 1) {
 						mouseDownPoint = {x: e.clientX, y: e.clientY};
 					}
-				}
+				};
 				canvas.onmouseup = function (e) {
 					if (e.which == 1) {
 						var strength = parseInt(document.getElementById('strength').value);
@@ -159,7 +160,33 @@
 							});
 						}
 					}
-				}
+				};
+			})();
+			// =keyboard events=
+			;(function() {
+				document.onkeypress = function(e) {
+					e = e || window.event;
+					//       escape: 13          enter: 27
+					if (e.keyCode == 13 || e.keyCode == 27) {
+						hideOptions();
+					}
+					//      plus(+): 43      equals(=): 61 (if they didn't hold shift)
+					if (e.keyCode == 43 || e.keyCode == 61) {
+						//increase strength
+						var strength = parseInt(document.getElementById('strength').value);
+						if (!isNaN(strength)) {
+							document.getElementById('strength').value = strength+1;
+						}
+					}
+					//     minus(-): 45
+					if (e.keyCode == 45) {
+						//decrease strength
+						var strength = parseInt(document.getElementById('strength').value);
+						if (!isNaN(strength) && strength > 1) {
+							document.getElementById('strength').value = strength-1;
+						}
+					}
+				};
 			})();
 			
 			function showOptions() {
