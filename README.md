@@ -1,1 +1,1 @@
-# http://glenwatson.github.io/starry-sky
+# http://glenwatson.github.io/starry-sky/canvas.html
