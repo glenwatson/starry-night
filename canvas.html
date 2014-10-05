@@ -35,7 +35,6 @@
 				margin-top: 15%;
 				padding: 60px;
 				width: 400px;
-				height: 40%;
 				color: #fff;
 				background-color: #111;
 				-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";	/* IE 8 */
@@ -123,6 +122,18 @@
 					</div>
 				</div>
 				<div class="optionsRow">
+					<div class="optionsCell">
+						Offscreen behavior
+					</div>
+					<div class="optionsCell">
+						<select id="offscreen" onchange="setOffscreen(this.value);">
+							<option value="randomizePos" >Random</option>
+							<option value="randomFadeIn" >Random (Fade)</option>
+							<option value="wrap" >Wrap</option>
+						</select>
+					</div>
+				</div>
+				<div class="optionsRow">
 					<div class="optionsCell double"><button onclick="stars=[]; updateStarCount();">New stars</button></div>
 					<div class="optionsCell">n</div>
 				</div>
@@ -148,7 +159,7 @@
 			var STRENGTH;
 			// =template methods=
 			var noop = function(){};
-			var handleOffScreen = randomFadeIn; //randomizePos; //wrap;
+			var handleOffScreen;
 			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var getInitColor = randomColor; //rainbowColor;
 			var recolor; // = recolorPos;
@@ -185,7 +196,8 @@
 						redraw: CLEAR_ON_DRAW,
 						nbrStars: NUM_STARS,
 						forceDist: FORCE_DIST,
-						moveStars: moveStars.name
+						moveStars: moveStars.name,
+						offscreen: handleOffScreen.name
 					},
 					forces: forces
 				});
@@ -216,6 +228,9 @@
 							}
 							if (state.options.moveStars) {
 								setMovement(state.options.moveStars);
+							}
+							if (state.options.offscreen) {
+								setOffscreen(state.options.offscreen);
 							}
 						}
 					}
@@ -336,7 +351,13 @@
 					moveStars = fn;
 				}
 			}
-			
+			function setOffscreen(offscreen) {
+				var fn = window[offscreen];
+				if (typeof fn === 'function') {
+					document.getElementById('offscreen').value = offscreen;
+					handleOffScreen = fn;
+				}
+			}
 			
 			function tick() {
 				moveStars(stars, forces);
@@ -591,7 +612,8 @@
 			if (!CLEAR_ON_DRAW) setRedraw(true);
 			if (!NUM_STARS) setNumStars(1000);
 			if (!FORCE_DIST) setForceDist(40);
-			if (!moveStars) moveStars = moveLength;
+			if (!handleOffScreen) setOffscreen('randomizePos');
+			if (!moveStars) setMovement('moveStars');
 			//	=start=
 			;(function() {
 				if (ANIMATION_FRAME && window.requestAnimationFrame) {
