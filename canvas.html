@@ -216,7 +216,7 @@
 				ctx.lineTo(force.pos.x+force.vect.x, force.pos.y+force.vect.y);
 				ctx.stroke();
 				ctx.beginPath();
-				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
+				ctx.arc(force.pos.x, force.pos.y, force.strength*FORCE_DIST, 0, Math.PI*2, true);
 				ctx.stroke();
 			}
 			// =fps=
