@@ -90,6 +90,7 @@
 				<div class="optionsRow">
 					<div class="optionsCell">Redraw</div>
 					<div class="optionsCell"><input id="redraw" onchange="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell">r</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Pause</div>
@@ -314,8 +315,11 @@
 							stars = [];
 							updateStarCount();
 							break;
+						
 						case 112: // p
 							setPaused(!PAUSED);
+						case 114: // r
+							setRedraw(!CLEAR_ON_DRAW);
 						case 115: // s
 							refreshUrl();
 							break;
