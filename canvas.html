@@ -92,6 +92,11 @@
 					<div class="optionsCell"><input id="redraw" onchange="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
 				</div>
 				<div class="optionsRow">
+					<div class="optionsCell">Pause</div>
+					<div class="optionsCell"><input id="paused" onchange="setPaused(this.checked);" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell">p</div>
+				</div>
+				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
 					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
 				</div>
@@ -152,6 +157,7 @@
 			// =settings=
 			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
+			var PAUSED;
 			var NUM_STARS;
 			var FORCE_DIST;
 			var DEBUG;
@@ -308,6 +314,8 @@
 							stars = [];
 							updateStarCount();
 							break;
+						case 112: // p
+							setPaused(!PAUSED);
 						case 115: // s
 							refreshUrl();
 							break;
@@ -366,12 +374,18 @@
 					handleOffScreen = fn;
 				}
 			}
+			function setPaused(bool) {
+				document.getElementById('paused').checked = bool;
+				PAUSED = bool;
+			}
 			
 			function tick() {
-				moveStars(stars, forces);
-				if (recolor) {
-					for (var i in stars) {
-						stars[i].color = recolor(i, NUM_STARS, stars[i]);
+				if (!PAUSED) {
+					moveStars(stars, forces);
+					if (recolor) {
+						for (var i in stars) {
+							stars[i].color = recolor(i, NUM_STARS, stars[i]);
+						}
 					}
 				}
 				if (CLEAR_ON_DRAW) {
@@ -615,6 +629,7 @@
 			
 			loadFromUrl();
 			// defaults
+			if (typeof PAUSED !== 'boolean') setPaused(false);
 			if (typeof DEBUG !== 'boolean') setDebug(false);
 			if (!STRENGTH) setStrength(5);
 			if (typeof CLEAR_ON_DRAW !== 'boolean') setRedraw(true);
