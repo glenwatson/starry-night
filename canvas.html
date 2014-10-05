@@ -192,6 +192,8 @@
 			function refreshUrl() {
 				location.hash = '#' + rison.encode({
 					v: 1,
+					width: canvas.width,
+					height: canvas.height,
 					options: {
 						redraw: CLEAR_ON_DRAW,
 						nbrStars: NUM_STARS,
@@ -216,8 +218,14 @@
 						if (state.forces) {
 							forces = state.forces;
 						}
+						if (state.width) {
+							canvas.width = state.width;
+						}
+						if (state.height) {
+							canvas.height = state.height;
+						}
 						if (state.options) {
-							if (state.options.redraw) {
+							if (typeof state.options.redraw === 'boolean') {
 								setRedraw(state.options.redraw);
 							}
 							if (state.options.nbrStars) {
@@ -607,13 +615,13 @@
 			
 			loadFromUrl();
 			// defaults
-			if (!DEBUG) setDebug(false);
+			if (typeof DEBUG !== 'boolean') setDebug(false);
 			if (!STRENGTH) setStrength(5);
-			if (!CLEAR_ON_DRAW) setRedraw(true);
+			if (typeof CLEAR_ON_DRAW !== 'boolean') setRedraw(true);
 			if (!NUM_STARS) setNumStars(1000);
 			if (!FORCE_DIST) setForceDist(40);
 			if (!handleOffScreen) setOffscreen('randomizePos');
-			if (!moveStars) setMovement('moveStars');
+			if (!moveStars) setMovement('moveLength');
 			//	=start=
 			;(function() {
 				if (ANIMATION_FRAME && window.requestAnimationFrame) {
