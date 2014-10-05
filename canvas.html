@@ -13,6 +13,7 @@
 			}
 			body {
 				font-family: 'Montserrat', sans-serif;
+				font-size: 22px;
 				background-color: #000;
 			}
 			canvas {
@@ -34,16 +35,20 @@
 				margin-left: auto;
 				margin-right: auto;
 				margin-top: 20%;
-				padding: 23px;
+				padding: 60px;
 				width: 500px;
 				height: 40%;
-				background-color: #777;
+				color: #fff;
+				background-color: #111;
+				-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";	/* IE 8 */
+				filter: alpha(opacity=90);	/* IE 5-7 */
+				-moz-opacity: 0.9;			/* Netscape */
+				-khtml-opacity: 0.9;		/* Safari 1.x */
+				opacity: 0.9;				/* Good browsers */
 				border-radius: 25px;
 			}
 			.optionsRow {
-				padding-top: 7px;
-				width: 200px;
-				clear: both;
+				height: 40px;
 			}
 			.optionsCell {
 				float: left;
@@ -58,11 +63,26 @@
 				right: 15;
 				cursor: pointer;
 			}
+			button {
+				font-family: 'Montserrat', sans-serif;
+				font-size: 22px;
+				padding: 5px 10px;
+				background-color: #444;
+				color: #fff;
+				border: 0;
+				cursor: pointer;
+			}
+			button:hover {
+				background-color: #666;
+			}
+			button:active {
+				background-color: #222;
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
-		<img id="options" onmouseover="showOptions();" src="gear512.png" />
+		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
 		<div id="optionsPanel" style="display:none;" >
 			<div id="optionsContainer" >
 				<div class="optionsRow">
