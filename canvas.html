@@ -112,6 +112,17 @@
 					<div class="optionsCell">&lt; &gt;</div>
 				</div>
 				<div class="optionsRow">
+					<div class="optionsCell">
+						Force Calc
+					</div>
+					<div class="optionsCell">
+						<select id="movement" onchange="setMovement(this.value);">
+							<option value="moveLength" >Length</option>
+							<option value="moveRadius" >Radius</option>
+						</select>
+					</div>
+				</div>
+				<div class="optionsRow">
 					<div class="optionsCell double"><button onclick="stars=[]; updateStarCount();">New stars</button></div>
 					<div class="optionsCell">n</div>
 				</div>
@@ -140,8 +151,8 @@
 			var handleOffScreen = randomFadeIn; //randomizePos; //wrap;
 			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var getInitColor = randomColor; //rainbowColor;
-			var recolor = undefined; //recolorPos;
-			var moveStars = moveLength; //moveRadius; //moveLength;
+			var recolor; // = recolorPos;
+			var moveStars;
 			// =canvas=
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
@@ -152,12 +163,6 @@
 			
 			var stars = [];
 			var forces = [];
-			loadFromUrl();
-			setDebug(false);
-			setStrength(5);
-			if (!CLEAR_ON_DRAW) setRedraw(true);
-			if (!NUM_STARS) setNumStars(1000);
-			if (!FORCE_DIST) setForceDist(40);
 			
 			//populate
 			function updateStarCount() {
@@ -179,7 +184,8 @@
 					options: {
 						redraw: CLEAR_ON_DRAW,
 						nbrStars: NUM_STARS,
-						forceDist: FORCE_DIST
+						forceDist: FORCE_DIST,
+						moveStars: moveStars.name
 					},
 					forces: forces
 				});
@@ -208,6 +214,9 @@
 							if (state.options.forceDist) {
 								setForceDist(state.options.forceDist);
 							}
+							if (state.options.moveStars) {
+								setMovement(state.options.moveStars);
+							}
 						}
 					}
 				}
@@ -227,8 +236,8 @@
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (!eq(mouseDownPoint, mouseUpPoint)) {
 							forces.push({
-								pos: mouseDownPoint, 
-								vect: sub(mouseUpPoint, mouseDownPoint), 
+								pos: mouseDownPoint,
+								vect: sub(mouseUpPoint, mouseDownPoint),
 								strength: STRENGTH
 							});
 						}
@@ -320,6 +329,14 @@
 				document.getElementById('forceDist').value = num;
 				FORCE_DIST = num;
 			}
+			function setMovement(movement) {
+				var fn = window[movement];
+				if (typeof fn === 'function') {
+					document.getElementById('movement').value = movement;
+					moveStars = fn;
+				}
+			}
+			
 			
 			function tick() {
 				moveStars(stars, forces);
@@ -566,6 +583,15 @@
 			function eq(a, b) {
 				return a.x == b.x && a.y == b.y;
 			}
+			
+			loadFromUrl();
+			// defaults
+			if (!DEBUG) setDebug(false);
+			if (!STRENGTH) setStrength(5);
+			if (!CLEAR_ON_DRAW) setRedraw(true);
+			if (!NUM_STARS) setNumStars(1000);
+			if (!FORCE_DIST) setForceDist(40);
+			if (!moveStars) moveStars = moveLength;
 			//	=start=
 			;(function() {
 				if (ANIMATION_FRAME && window.requestAnimationFrame) {
