@@ -94,6 +94,10 @@
 					<div class="optionsCell"><input id="debug" onclick="DEBUG =! DEBUG;" type="checkbox" /></div>
 				</div>
 				<div class="optionsRow">
+					<div class="optionsCell">Strength</div>
+					<div class="optionsCell"><input id="strength" onclick=";" type="text" value="5" size="1" /></div>
+				</div>
+				<div class="optionsRow">
 					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
 				</div>
 			</div>
@@ -142,12 +146,16 @@
 				}
 				canvas.onmouseup = function (e) {
 					if (e.which == 1) {
+						var strength = parseInt(document.getElementById('strength').value);
+						if (isNaN(strength)) {
+							strength = 5;
+						}
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (!eq(mouseDownPoint, mouseUpPoint)) {
 							forces.push({
 								pos: mouseDownPoint, 
 								vect: sub(mouseUpPoint, mouseDownPoint), 
-								strength: Math.random() * 5 + 3
+								strength: strength
 							});
 						}
 					}
