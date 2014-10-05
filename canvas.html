@@ -3,7 +3,7 @@
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<title>Stars</title>
 		<link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
-		
+		<script type="text/javascript" src="rison.js" ></script>
 		<style>
 			html, body {
 				width: 100%;
@@ -100,6 +100,9 @@
 				<div class="optionsRow">
 					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
 				</div>
+				<div class="optionsRow">
+					<div class="optionsCell"><button onclick="refreshUrl();">Save as URL</button></div>
+				</div>
 			</div>
 			<div id="optionsClose" onclick="hideOptions();" >X</div>
 		</div>
@@ -128,12 +131,29 @@
 			
 			var stars = [];
 			var forces = [];
+			loadUrl();
+			
 			//populate
 			for (var i=0; i<NUM_STARS; i++) {
 				var star = {};
 				star.pos = getInitPos(i, NUM_STARS);
 				star.color = getInitColor(i, NUM_STARS, star);
 				stars.push(star);
+			}
+			// =state persistence=
+			function refreshUrl() {
+				location.hash = '#' + rison.encode({'forces': forces});
+			}
+			function loadUrl() {
+				var strState = location.hash;
+				if (strState.length > 1) {
+					// remove #
+					strState = strState.substring(1, strState.length);
+					state = rison.decode(strState);
+					if (state.forces) {
+						forces = state.forces;
+					}
+				}
 			}
 			
 			// ==events==
