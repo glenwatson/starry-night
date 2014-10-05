@@ -34,7 +34,7 @@
 				margin-right: auto;
 				margin-top: 15%;
 				padding: 60px;
-				width: 500px;
+				width: 400px;
 				height: 40%;
 				color: #fff;
 				background-color: #111;
@@ -96,14 +96,17 @@
 				<div class="optionsRow">
 					<div class="optionsCell">Strength</div>
 					<div class="optionsCell"><input id="strength" onchange="setStrength(this.value);" type="text" value="5" size="1" /></div>
+					<div class="optionsCell">- +</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Force Dist</div>
 					<div class="optionsCell"><input id="forceDist" onchange="setForceDist(this.value);" type="text" value="40" size="1" /></div>
+					<div class="optionsCell">[ ]</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Stars</div>
 					<div class="optionsCell"><input id="stars" onchange="setNumStars(this.value);" type="text" value="1000" size="1" /></div>
+					<div class="optionsCell">&lt; &gt;</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
@@ -227,28 +230,38 @@
 			;(function() {
 				document.onkeypress = function(e) {
 					e = e || window.event;
-					//       escape: 13          enter: 27
-					if (e.keyCode == 13 || e.keyCode == 27) {
-						hideOptions();
+					switch (e.keyCode) {
+						case 13: // enter
+						case 27: // escape
+							hideOptions();
+							break;
+						case 43: // plus (+)
+						case 61: // equals (=) (if they didn't hold shift)
+							//increase strength
+							setStrength(STRENGTH+1);
+							break;
+						case 45: // minus (-)
+							//decrease strength
+							setStrength(STRENGTH-1);
+							break;
+						case 44: // left angle bracket (<)
+							//decrease number of stars
+							setNumStars(NUM_STARS-10);
+							break;
+						case 46: // right angle bracket (>)
+							//increase number of stars
+							setNumStars(NUM_STARS+10);
+							break;
+						case 91: // left bracket ([)
+							//decrease force distance
+							setForceDist(FORCE_DIST-5);
+							break;
+						case 93: //right bracket (])
+							//increase force distance
+							setForceDist(FORCE_DIST+5);
+							break;
 					}
-					//      plus(+): 43      equals(=): 61 (if they didn't hold shift)
-					if (e.keyCode == 43 || e.keyCode == 61) {
-						//increase strength
-						setStrength(STRENGTH+1);
-					}
-					//     minus(-): 45
-					if (e.keyCode == 45) {
-						//decrease strength
-						setStrength(STRENGTH-1);
-					}
-					// left bracket: 91
-					if (e.keyCode == 91) {
-						setNumStars(NUM_STARS-10);
-					}
-					//right bracket: 93
-					if (e.keyCode == 93) {
-						setNumStars(NUM_STARS+10);
-					}
+					
 				};
 			})();
 			
