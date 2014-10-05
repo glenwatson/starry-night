@@ -87,15 +87,23 @@
 			<div id="optionsContainer" >
 				<div class="optionsRow">
 					<div class="optionsCell">Redraw</div>
-					<div class="optionsCell"><input id="redraw" onclick="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell"><input id="redraw" onchange="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
-					<div class="optionsCell"><input id="debug" onclick="setDebug(this.checked);" type="checkbox" /></div>
+					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Strength</div>
-					<div class="optionsCell"><input id="strength" onclick="setStrength(this.checked);" type="text" value="5" size="1" /></div>
+					<div class="optionsCell"><input id="strength" onchange="setStrength(this.value);" type="text" value="5" size="1" /></div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Force Dist</div>
+					<div class="optionsCell"><input id="forceDist" onchange="setForceDist(this.value);" type="text" value="40" size="1" /></div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Stars</div>
+					<div class="optionsCell"><input id="stars" onchange="setNumStars(this.value);" type="text" value="1000" size="1" /></div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell"><button onclick="forces=[];">Clear</button></div>
@@ -110,8 +118,8 @@
 			// =settings=
 			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
-			var NUM_STARS = 1000;
-			var FORCE_DIST = 40;
+			var NUM_STARS;
+			var FORCE_DIST;
 			var DEBUG;
 			var CLEAR_ON_DRAW;
 			var STRENGTH;
@@ -132,23 +140,39 @@
 			
 			var stars = [];
 			var forces = [];
-			loadUrl();
+			loadFromUrl();
 			setDebug(false);
-			setRedraw(true);
 			setStrength(5);
+			if (!CLEAR_ON_DRAW) setRedraw(true);
+			if (!NUM_STARS) setNumStars(1000);
+			if (!FORCE_DIST) setForceDist(40);
 			
 			//populate
-			for (var i=0; i<NUM_STARS; i++) {
-				var star = {};
-				star.pos = getInitPos(i, NUM_STARS);
-				star.color = getInitColor(i, NUM_STARS, star);
-				stars.push(star);
+			function updateStarCount() {
+				if (stars.length > NUM_STARS) {
+					stars = stars.slice(0, NUM_STARS);
+				} else {
+					for (var i=stars.length; i<NUM_STARS; i++) {
+						var star = {};
+						star.pos = getInitPos(i, NUM_STARS);
+						star.color = getInitColor(i, NUM_STARS, star);
+						stars.push(star);
+					}
+				}
 			}
 			// =state persistence=
 			function refreshUrl() {
-				location.hash = '#' + rison.encode({'forces': forces});
+				location.hash = '#' + rison.encode({
+					v: 1,
+					options: {
+						redraw: CLEAR_ON_DRAW,
+						nbrStars: NUM_STARS,
+						forceDist: FORCE_DIST
+					},
+					forces: forces
+				});
 			}
-			function loadUrl() {
+			function loadFromUrl() {
 				var strState = location.hash;
 				if (strState.length > 1) {
 					// remove #
@@ -158,8 +182,21 @@
 						strState = decodeURIComponent(strState);
 					}
 					state = rison.decode(strState);
-					if (state.forces) {
-						forces = state.forces;
+					if (state.v == 1) {
+						if (state.forces) {
+							forces = state.forces;
+						}
+						if (state.options) {
+							if (state.options.redraw) {
+								setRedraw(state.options.redraw);
+							}
+							if (state.options.nbrStars) {
+								setNumStars(state.options.nbrStars);
+							}
+							if (state.options.forceDist) {
+								setForceDist(state.options.forceDist);
+							}
+						}
 					}
 				}
 			}
@@ -219,7 +256,7 @@
 			}
 			function setStrength(num) {
 				if (isNaN(num)) {
-					num = 5;
+					num = STRENGTH;
 				}
 				document.getElementById('strength').value = num;
 				STRENGTH = num;
@@ -227,6 +264,21 @@
 			function setRedraw(bool) {
 				document.getElementById('redraw').checked = bool;
 				CLEAR_ON_DRAW = bool;
+			}
+			function setNumStars(num) {
+				if (isNaN(num)) {
+					num = NUM_STARS;
+				}
+				document.getElementById('stars').value = num;
+				NUM_STARS = num;
+				updateStarCount();
+			}
+			function setForceDist(num) {
+				if (isNaN(num)) {
+					num = FORCE_DIST;
+				}
+				document.getElementById('forceDist').value = num;
+				FORCE_DIST = num;
 			}
 			
 			function tick() {
