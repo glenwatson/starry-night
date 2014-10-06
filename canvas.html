@@ -98,6 +98,16 @@
 					<div class="optionsCell">p</div>
 				</div>
 				<div class="optionsRow">
+					<div class="optionsCell">Mode</div>
+					<div class="optionsCell">
+						<select id="mode" onchange="setMode(this.value);">
+							<option value="0" >Add</option>
+							<option value="1" >Edit</option>
+						</select>
+					</div>
+					<div class="optionsCell">m</div>
+				</div>
+				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
 					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
 					<div class="optionsCell">d</div>
@@ -118,9 +128,7 @@
 					<div class="optionsCell">&lt; &gt;</div>
 				</div>
 				<div class="optionsRow">
-					<div class="optionsCell">
-						Force Calc
-					</div>
+					<div class="optionsCell">Force Calc</div>
 					<div class="optionsCell">
 						<select id="movement" onchange="setMovement(this.value);">
 							<option value="moveLength" >Length</option>
@@ -129,9 +137,7 @@
 					</div>
 				</div>
 				<div class="optionsRow">
-					<div class="optionsCell">
-						Offscreen behavior
-					</div>
+					<div class="optionsCell">Offscreen behavior</div>
 					<div class="optionsCell">
 						<select id="offscreen" onchange="setOffscreen(this.value);">
 							<option value="randomizePos" >Random</option>
@@ -160,6 +166,7 @@
 			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
 			var PAUSED;
+			var MODE;
 			var NUM_STARS;
 			var FORCE_DIST;
 			var DEBUG;
@@ -257,74 +264,106 @@
 			// =mouse clicks=
 			;(function() {
 				var mouseDownPoint={x:0, y:0};
+				var mouseDownForce = null;
+				var dragOffset={x:0, y:0};
+				function onmove(e) {
+					var mouseMovePoint = {x: e.clientX, y: e.clientY};
+					if(MODE === 1 && mouseDownForce && dragOffset) {
+						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
+					}
+				}
 				canvas.onmousedown = function (e) {
 					if (e.which == 1) {
 						mouseDownPoint = {x: e.clientX, y: e.clientY};
+						if (MODE === 0) {
+						} else if(MODE === 1) {
+							for (i in forces) {
+								var force = forces[i];
+								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
+									mouseDownForce = force;
+									dragOffset = sub(force.pos, mouseDownPoint);
+									canvas.onmousemove = onmove;
+									break;
+								}
+							}
+						}
 					}
 				};
 				canvas.onmouseup = function (e) {
 					if (e.which == 1) {
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
-						if (!eq(mouseDownPoint, mouseUpPoint)) {
-							forces.push({
-								pos: mouseDownPoint,
-								vect: sub(mouseUpPoint, mouseDownPoint),
-								strength: STRENGTH
-							});
+						if (MODE === 0) {
+							if (!eq(mouseDownPoint, mouseUpPoint)) {
+								forces.push({
+									pos: mouseDownPoint,
+									vect: sub(mouseUpPoint, mouseDownPoint),
+									strength: STRENGTH
+								});
+							}
+						} else if(MODE === 1 && mouseDownForce && dragOffset) {
+							mouseDownForce.pos = add(mouseUpPoint, dragOffset);
+							dragOffset = {x:0, y:0};
 						}
 					}
+					canvas.onmousemove = null;
 				};
-			})();
-			// =keyboard events=
-			;(function() {
-				document.onkeypress = function(e) {
+				
+				// =keyboard events=
+				document.onkeyup = function(e) {
 					e = e || window.event;
 					switch (e.charCode || e.keyCode || e.key) {
 						case 13: // enter
 						case 27: // escape
 							hideOptions();
 							break;
-						case 43: // plus (+)
-						case 61: // equals (=) (if they didn't hold shift)
+						case 46: //delete
+							//remove force
+							forces.splice(forces.indexOf(mouseDownForce), 1);
+							break;
+						case 187: // plus (+)
 							//increase strength
 							setStrength(STRENGTH+1);
 							break;
-						case 45: // minus (-)
+						case 189: // minus (-)
 							//decrease strength
 							setStrength(STRENGTH-1);
 							break;
-						case 44: // left angle bracket (<)
+						case 188: // left angle bracket (<)
 							//decrease number of stars
 							setNumStars(NUM_STARS-10);
 							break;
-						case 46: // right angle bracket (>)
+						case 190: // right angle bracket (>)
 							//increase number of stars
 							setNumStars(NUM_STARS+10);
 							break;
-						case 91: // left bracket ([)
+						case 219: // left bracket ([)
 							//decrease force distance
 							setForceDist(FORCE_DIST-5);
 							break;
-						case 93: //right bracket (])
+						case 221: //right bracket (])
 							//increase force distance
 							setForceDist(FORCE_DIST+5);
 							break;
-						case 99: // c
+						case 67: // c
 							forces = [];
 							break;
-						case 100: // d
+						case 68: // d
 							setDebug(!DEBUG);
 							break;
-						case 110: // n
+						case 77: // m
+							setMode((MODE+1)%2);
+							break;
+						case 78: // n
 							stars = [];
 							updateStarCount();
 							break;
-						
-						case 112: // p
+						case 80: // p
 							setPaused(!PAUSED);
-						case 114: // r
+							break;
+						case 82: // r
 							setRedraw(!CLEAR_ON_DRAW);
-						case 115: // s
+							break;
+						case 83: // s
 							refreshUrl();
 							break;
 					}
@@ -388,6 +427,13 @@
 			function setPaused(bool) {
 				document.getElementById('paused').checked = bool;
 				PAUSED = bool;
+			}
+			function setMode(num) {
+				if (isNaN(num) || num < 0 || num < 0 || num > 1) {
+					num = MODE;
+				}
+				document.getElementById('mode').value = num;
+				MODE = num;
 			}
 			
 			function tick() {
@@ -641,6 +687,7 @@
 			loadFromUrl();
 			// defaults
 			if (typeof PAUSED !== 'boolean') setPaused(false);
+			if (typeof MODE !== 'integer') setMode(0);
 			if (typeof DEBUG !== 'boolean') setDebug(false);
 			if (!STRENGTH) setStrength(5);
 			if (typeof CLEAR_ON_DRAW !== 'boolean') setRedraw(true);
