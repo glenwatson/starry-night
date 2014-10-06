@@ -100,6 +100,7 @@
 				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
 					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
+					<div class="optionsCell">d</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Strength</div>
@@ -311,6 +312,9 @@
 						case 99: // c
 							forces = [];
 							break;
+						case 100: // d
+							setDebug(!DEBUG);
+							break;
 						case 110: // n
 							stars = [];
 							updateStarCount();
@@ -339,6 +343,7 @@
 				DEBUG = bool;
 			}
 			function setStrength(num) {
+				num = parseInt(num);
 				if (isNaN(num) || num < 0) {
 					num = STRENGTH;
 				}
@@ -350,6 +355,7 @@
 				CLEAR_ON_DRAW = bool;
 			}
 			function setNumStars(num) {
+				num = parseInt(num);
 				if (isNaN(num) || num < 0) {
 					num = NUM_STARS;
 				}
@@ -358,6 +364,7 @@
 				updateStarCount();
 			}
 			function setForceDist(num) {
+				num = parseInt(num);
 				if (isNaN(num) || num < 0) {
 					num = FORCE_DIST;
 				}
