@@ -100,6 +100,7 @@
 				<div class="optionsRow">
 					<div class="optionsCell">Debug</div>
 					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
+					<div class="optionsCell">d</div>
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Strength</div>
@@ -310,6 +311,9 @@
 							break;
 						case 99: // c
 							forces = [];
+							break;
+						case 100: // d
+							setDebug(!DEBUG);
 							break;
 						case 110: // n
 							stars = [];
