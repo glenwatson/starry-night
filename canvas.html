@@ -84,6 +84,7 @@
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
+		<canvas id="debug"></canvas>
 		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
 		<div id="optionsPanel" style="display:none;" >
 			<div id="optionsContainer" >
@@ -124,7 +125,7 @@
 				</div>
 				<div class="optionsRow">
 					<div class="optionsCell">Stars</div>
-					<div class="optionsCell"><input id="stars" onchange="setNumStars(this.value);" type="text" value="1000" size="1" /></div>
+					<div class="optionsCell"><input id="stars" onchange="setNumStars(this.value);" type="text" value="1000" size="2" /></div>
 					<div class="optionsCell">&lt; &gt;</div>
 				</div>
 				<div class="optionsRow">
@@ -162,6 +163,7 @@
 			<div id="optionsClose" onclick="hideOptions();" >X</div>
 		</div>
 		<script>
+			// ==set-up==
 			// =settings=
 			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
@@ -173,7 +175,7 @@
 			var CLEAR_ON_DRAW;
 			var STRENGTH;
 			// =template methods=
-			var noop = function(){};
+			var noop = function (){};
 			var handleOffScreen;
 			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
 			var getInitColor = randomColor; //rainbowColor;
@@ -184,26 +186,18 @@
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
-			ctx.font = "8pt Arial";
-			ctx.textAlign = "end";
+			
+			var debugCanvas = document.getElementById('debug');
+			debugCanvas.width = document.body.clientWidth;
+			debugCanvas.height = document.body.clientHeight;
+			var debugCtx = debugCanvas.getContext('2d');
+			debugCtx.font = "8pt Arial";
+			debugCtx.textAlign = "end";
 			
 			var stars = [];
 			var forces = [];
 			
-			//populate
-			function updateStarCount() {
-				if (stars.length > NUM_STARS) {
-					stars = stars.slice(0, NUM_STARS);
-				} else {
-					for (var i=stars.length; i<NUM_STARS; i++) {
-						var star = {};
-						star.pos = getInitPos(i, NUM_STARS);
-						star.color = getInitColor(i, NUM_STARS, star);
-						stars.push(star);
-					}
-				}
-			}
-			// =state persistence=
+			// ==state persistence==
 			function refreshUrl() {
 				location.hash = '#' + rison.encode({
 					v: 1,
@@ -235,9 +229,11 @@
 						}
 						if (state.width) {
 							canvas.width = state.width;
+							debugCanvas.width = state.width;
 						}
 						if (state.height) {
 							canvas.height = state.height;
+							debugCanvas.height = state.height;
 						}
 						if (state.options) {
 							if (typeof state.options.redraw === 'boolean') {
@@ -262,34 +258,35 @@
 			
 			// ==events==
 			// =mouse clicks=
-			;(function() {
-				var mouseDownPoint={x:0, y:0};
+			;(function () {
+				var mouseDownPoint = {x:0, y:0};
 				var mouseDownForce = null;
-				var dragOffset={x:0, y:0};
+				var dragOffset = {x:0, y:0};
 				function onmove(e) {
 					var mouseMovePoint = {x: e.clientX, y: e.clientY};
-					if(MODE === 1 && mouseDownForce && dragOffset) {
+					if (MODE === 1 && mouseDownForce && dragOffset) {
 						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
 					}
 				}
-				canvas.onmousedown = function (e) {
+				debugCanvas.onmousedown = function (e) {
 					if (e.which == 1) {
 						mouseDownPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
-						} else if(MODE === 1) {
+							// Already captured mouseDownPoint
+						} else if (MODE === 1) {
 							for (i in forces) {
 								var force = forces[i];
 								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
 									mouseDownForce = force;
 									dragOffset = sub(force.pos, mouseDownPoint);
-									canvas.onmousemove = onmove;
+									debugCanvas.onmousemove = onmove;
 									break;
 								}
 							}
 						}
 					}
 				};
-				canvas.onmouseup = function (e) {
+				debugCanvas.onmouseup = function (e) {
 					if (e.which == 1) {
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
@@ -300,16 +297,16 @@
 									strength: STRENGTH
 								});
 							}
-						} else if(MODE === 1 && mouseDownForce && dragOffset) {
+						} else if (MODE === 1 && mouseDownForce && dragOffset) {
 							mouseDownForce.pos = add(mouseUpPoint, dragOffset);
 							dragOffset = {x:0, y:0};
 						}
 					}
-					canvas.onmousemove = null;
+					debugCanvas.onmousemove = null;
 				};
 				
 				// =keyboard events=
-				document.onkeyup = function(e) {
+				document.onkeyup = function (e) {
 					e = e || window.event;
 					switch (e.charCode || e.keyCode || e.key) {
 						case 13: // enter
@@ -319,30 +316,6 @@
 						case 46: //delete
 							//remove force
 							forces.splice(forces.indexOf(mouseDownForce), 1);
-							break;
-						case 187: // plus (+)
-							//increase strength
-							setStrength(STRENGTH+1);
-							break;
-						case 189: // minus (-)
-							//decrease strength
-							setStrength(STRENGTH-1);
-							break;
-						case 188: // left angle bracket (<)
-							//decrease number of stars
-							setNumStars(NUM_STARS-10);
-							break;
-						case 190: // right angle bracket (>)
-							//increase number of stars
-							setNumStars(NUM_STARS+10);
-							break;
-						case 219: // left bracket ([)
-							//decrease force distance
-							setForceDist(FORCE_DIST-5);
-							break;
-						case 221: //right bracket (])
-							//increase force distance
-							setForceDist(FORCE_DIST+5);
 							break;
 						case 67: // c
 							forces = [];
@@ -357,6 +330,9 @@
 							stars = [];
 							updateStarCount();
 							break;
+						case 79: // o
+							showOptions();
+							break;
 						case 80: // p
 							setPaused(!PAUSED);
 							break;
@@ -366,6 +342,31 @@
 						case 83: // s
 							refreshUrl();
 							break;
+						case 187: // + (plus)
+							//increase strength
+							setStrength(STRENGTH+1);
+							break;
+						case 189: // - (minus)
+							//decrease strength
+							setStrength(STRENGTH-1);
+							break;
+						case 188: // < (left angle bracket)
+							//decrease number of stars
+							setNumStars(NUM_STARS-10);
+							break;
+						case 190: // > (right angle bracket)
+							//increase number of stars
+							setNumStars(NUM_STARS+10);
+							break;
+						case 219: // [ (left bracket)
+							//decrease force distance
+							setForceDist(FORCE_DIST-5);
+							break;
+						case 221: // ] (right bracket)
+							//increase force distance
+							setForceDist(FORCE_DIST+5);
+							break;
+						
 					}
 					
 				};
@@ -429,13 +430,28 @@
 				PAUSED = bool;
 			}
 			function setMode(num) {
+				num = parseInt(num);
 				if (isNaN(num) || num < 0 || num < 0 || num > 1) {
 					num = MODE;
 				}
 				document.getElementById('mode').value = num;
 				MODE = num;
 			}
+			// =populate=
+			function updateStarCount() {
+				if (stars.length > NUM_STARS) {
+					stars = stars.slice(0, NUM_STARS);
+				} else {
+					for (var i=stars.length; i<NUM_STARS; i++) {
+						var star = {};
+						star.pos = getInitPos(i, NUM_STARS);
+						star.color = getInitColor(i, NUM_STARS, star);
+						stars.push(star);
+					}
+				}
+			}
 			
+			// ==callback==
 			function tick() {
 				if (!PAUSED) {
 					moveStars(stars, forces);
@@ -448,11 +464,13 @@
 				if (CLEAR_ON_DRAW) {
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 				}
+				debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
 					drawFramerate();
 					drawFps();
+					drawOptions();
 				}
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
@@ -473,9 +491,9 @@
 				ctx.closePath();
 			}
 			function drawForces(forces) {
-				ctx.strokeStyle = "#ffffff";
+				debugCtx.strokeStyle = "#ffffff";
 				for (var i in forces) {
-					drawForce(forces[i], ctx);
+					drawForce(forces[i], debugCtx);
 				}
 			}
 			function drawForce(force, ctx) {
@@ -489,30 +507,40 @@
 				ctx.stroke();
 			}
 			// =fps=
-			var drawFps = (function() {
+			var drawFps = (function () {
 				var fps = 0;
 				var frameCount = 0;
-				setInterval(function() {
+				setInterval(function () {
 					fps = frameCount;
 					frameCount = 0;
 				}, 1000); //1 second
-				return function() {
+				return function () {
 					frameCount++;
-					ctx.fillStyle = "#ffffff";
-					ctx.fillText(fps+" fps", canvas.width-10, 20);
+					debugCtx.fillStyle = "#ffffff";
+					debugCtx.fillText(fps+" fps", debugCanvas.width-10, 20);
 				}
 			})();
 			
 			// =framerate=
-			var drawFramerate = (function() {
+			var drawFramerate = (function () {
 				var lastFrame = new Date().getTime();
-				return function() {
+				return function () {
 					var thisFrame = new Date().getTime();
-					ctx.fillStyle = "#ffffff";
-					ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+					debugCtx.fillStyle = "#ffffff";
+					debugCtx.fillText((thisFrame - lastFrame) / 1000, debugCanvas.width-10, 10);
 					lastFrame = thisFrame;
 				}
 			})();
+			function drawOptions() {
+				debugCtx.fillStyle = "#ffffff";
+				debugCtx.fillText("Redraw: "+CLEAR_ON_DRAW, debugCanvas.width-10, 30);
+				debugCtx.fillText("Paused: "+PAUSED, debugCanvas.width-10, 40);
+				debugCtx.fillText("Mode: "+MODE, debugCanvas.width-10, 50);
+				debugCtx.fillText("Strength: "+STRENGTH, debugCanvas.width-10, 60);
+				debugCtx.fillText("Force Dist: "+FORCE_DIST, debugCanvas.width-10, 70);
+				debugCtx.fillText("#Stars: "+NUM_STARS, debugCanvas.width-10, 80);
+
+			}
 			// =pos=
 			function randomPos() {
 				return {
@@ -565,10 +593,6 @@
 				}
 				return Math.round(Math.sin(star.brightness)*90);
 			}
-			function isOutsideScreen(star) {
-				return star.pos.x < 0 || star.pos.y < 0 ||
-					star.pos.x > canvas.width || star.pos.y > canvas.height;
-			}
 			// ==Movement==
 			function moveLength(stars, forces) {
 				for (var f in forces) {
@@ -620,6 +644,10 @@
 				}
 			}
 			// =off screen=
+			function isOutsideScreen(star) {
+				return star.pos.x < 0 || star.pos.y < 0 ||
+					star.pos.x > canvas.width || star.pos.y > canvas.height;
+			}
 			function wrap(star) {
 				if (star.pos.x < 0) {
 					star.pos.x = canvas.width;
@@ -642,6 +670,7 @@
 				randomizePos(star);
 				star.brightness = 0;
 			}
+			// =Helper functions=
 			function dist(pos1, pos2) {
 				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 			}
@@ -661,7 +690,6 @@
 				var pointB = add(segStart, vMulScalar(b, v));
 				return vDist(point, pointB);
 			}
-			// =Helper functions=
 			function dot(a, b) {
 				return a.x * b.x + a.y * b.y;
 			}
@@ -692,11 +720,11 @@
 			if (!STRENGTH) setStrength(5);
 			if (typeof CLEAR_ON_DRAW !== 'boolean') setRedraw(true);
 			if (!NUM_STARS) setNumStars(1000);
-			if (!FORCE_DIST) setForceDist(40);
+			if (!FORCE_DIST) setForceDist(20);
 			if (!handleOffScreen) setOffscreen('randomizePos');
 			if (!moveStars) setMovement('moveLength');
 			//	=start=
-			;(function() {
+			;(function () {
 				if (ANIMATION_FRAME && window.requestAnimationFrame) {
 					tick();
 				} else {
