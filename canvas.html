@@ -84,6 +84,7 @@
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
+		<canvas id="debug"></canvas>
 		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
 		<div id="optionsPanel" style="display:none;" >
 			<div id="optionsContainer" >
@@ -185,8 +186,13 @@
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
-			ctx.font = "8pt Arial";
-			ctx.textAlign = "end";
+			
+			var debugCanvas = document.getElementById('debug');
+			debugCanvas.width = document.body.clientWidth;
+			debugCanvas.height = document.body.clientHeight;
+			var debugCtx = debugCanvas.getContext('2d');
+			debugCtx.font = "8pt Arial";
+			debugCtx.textAlign = "end";
 			
 			var stars = [];
 			var forces = [];
@@ -223,9 +229,11 @@
 						}
 						if (state.width) {
 							canvas.width = state.width;
+							debugCanvas.width = state.width;
 						}
 						if (state.height) {
 							canvas.height = state.height;
+							debugCanvas.height = state.height;
 						}
 						if (state.options) {
 							if (typeof state.options.redraw === 'boolean') {
@@ -260,7 +268,7 @@
 						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
 					}
 				}
-				canvas.onmousedown = function (e) {
+				debugCanvas.onmousedown = function (e) {
 					if (e.which == 1) {
 						mouseDownPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
@@ -271,14 +279,14 @@
 								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
 									mouseDownForce = force;
 									dragOffset = sub(force.pos, mouseDownPoint);
-									canvas.onmousemove = onmove;
+									debugCanvas.onmousemove = onmove;
 									break;
 								}
 							}
 						}
 					}
 				};
-				canvas.onmouseup = function (e) {
+				debugCanvas.onmouseup = function (e) {
 					if (e.which == 1) {
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
@@ -294,7 +302,7 @@
 							dragOffset = {x:0, y:0};
 						}
 					}
-					canvas.onmousemove = null;
+					debugCanvas.onmousemove = null;
 				};
 				
 				// =keyboard events=
@@ -456,11 +464,13 @@
 				if (CLEAR_ON_DRAW) {
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 				}
+				debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
 					drawFramerate();
 					drawFps();
+					drawOptions();
 				}
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
@@ -481,9 +491,9 @@
 				ctx.closePath();
 			}
 			function drawForces(forces) {
-				ctx.strokeStyle = "#ffffff";
+				debugCtx.strokeStyle = "#ffffff";
 				for (var i in forces) {
-					drawForce(forces[i], ctx);
+					drawForce(forces[i], debugCtx);
 				}
 			}
 			function drawForce(force, ctx) {
@@ -506,8 +516,8 @@
 				}, 1000); //1 second
 				return function () {
 					frameCount++;
-					ctx.fillStyle = "#ffffff";
-					ctx.fillText(fps+" fps", canvas.width-10, 20);
+					debugCtx.fillStyle = "#ffffff";
+					debugCtx.fillText(fps+" fps", debugCanvas.width-10, 20);
 				}
 			})();
 			
@@ -516,11 +526,21 @@
 				var lastFrame = new Date().getTime();
 				return function () {
 					var thisFrame = new Date().getTime();
-					ctx.fillStyle = "#ffffff";
-					ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+					debugCtx.fillStyle = "#ffffff";
+					debugCtx.fillText((thisFrame - lastFrame) / 1000, debugCanvas.width-10, 10);
 					lastFrame = thisFrame;
 				}
 			})();
+			function drawOptions() {
+				debugCtx.fillStyle = "#ffffff";
+				debugCtx.fillText("Redraw: "+CLEAR_ON_DRAW, debugCanvas.width-10, 30);
+				debugCtx.fillText("Paused: "+PAUSED, debugCanvas.width-10, 40);
+				debugCtx.fillText("Mode: "+MODE, debugCanvas.width-10, 50);
+				debugCtx.fillText("Strength: "+STRENGTH, debugCanvas.width-10, 60);
+				debugCtx.fillText("Force Dist: "+FORCE_DIST, debugCanvas.width-10, 70);
+				debugCtx.fillText("#Stars: "+NUM_STARS, debugCanvas.width-10, 80);
+
+			}
 			// =pos=
 			function randomPos() {
 				return {
