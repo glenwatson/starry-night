@@ -1,41 +1,185 @@
 <html>
 	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<title>Stars</title>
+		<link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src="js/rison.min.js" ></script>
 		<style>
 			html, body {
-				width: 100%;
-				height: 100%;
 				margin: 0;
 				padding: 0;
 			}
 			body {
-				background-color: #000000
+				font-family: 'Montserrat', sans-serif;
+				font-size: 22px;
+				background-color: #000;
 			}
 			canvas {
 				position: absolute;
 				left: 0;
 				top: 0;
 			}
-			#settings {
+			
+			#options {
 				position: absolute;
-				right: 0;
+				left: 0;
 				bottom: 0;
+				margin: 5px;
+				width: 15px;
+				height: 15px;
+			}
+			#optionsPanel {
+				position: relative;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 15%;
+				padding: 60px;
+				width: 400px;
+				color: #fff;
+				background-color: #111;
+				-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";	/* IE 8 */
+				filter: alpha(opacity=90);	/* IE 5-7 */
+				-moz-opacity: 0.9;			/* Netscape */
+				-khtml-opacity: 0.9;		/* Safari 1.x */
+				opacity: 0.9;				/* Good browsers */
+				border-radius: 25px;
+			}
+			.optionsRow {
+				width: 500px;
+				height: 40px;
+				clear: both;
+			}
+			.optionsCell {
+				float: left;
+				width: 150px;
+			}
+			.optionsCell.double {
+				width: 300px;
+			}
+			#optionsContainer {
+				width: 200px;
+			}
+			#optionsClose {
+				position: absolute;
+				top: 15;
+				right: 15;
+				cursor: pointer;
+			}
+			button {
+				font-family: 'Montserrat', sans-serif;
+				font-size: 22px;
+				padding: 5px 10px;
+				background-color: #444;
+				color: #fff;
+				border: 0;
+				cursor: pointer;
+			}
+			button:hover {
+				background-color: #666;
+			}
+			button:active {
+				background-color: #222;
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
-		<div id="settings">
-			<input onclick="DEBUG =! DEBUG;" type="checkbox" />
-			<input onclick="CLEAR_ON_DRAW =! CLEAR_ON_DRAW;" type="checkbox" />
-			<input onclick="forces=[];" type="checkbox" />
+		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
+		<div id="optionsPanel" style="display:none;" >
+			<div id="optionsContainer" >
+				<div class="optionsRow">
+					<div class="optionsCell">Redraw</div>
+					<div class="optionsCell"><input id="redraw" onchange="setRedraw(this.checked);" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell">r</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Pause</div>
+					<div class="optionsCell"><input id="paused" onchange="setPaused(this.checked);" type="checkbox" checked="checked" /></div>
+					<div class="optionsCell">p</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Mode</div>
+					<div class="optionsCell">
+						<select id="mode" onchange="setMode(this.value);">
+							<option value="0" >Add</option>
+							<option value="1" >Edit</option>
+						</select>
+					</div>
+					<div class="optionsCell">m</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Debug</div>
+					<div class="optionsCell"><input id="debug" onchange="setDebug(this.checked);" type="checkbox" /></div>
+					<div class="optionsCell">d</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Strength</div>
+					<div class="optionsCell"><input id="strength" onchange="setStrength(this.value);" type="text" value="5" size="1" /></div>
+					<div class="optionsCell">- +</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Force Dist</div>
+					<div class="optionsCell"><input id="forceDist" onchange="setForceDist(this.value);" type="text" value="40" size="1" /></div>
+					<div class="optionsCell">[ ]</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Stars</div>
+					<div class="optionsCell"><input id="stars" onchange="setNumStars(this.value);" type="text" value="1000" size="1" /></div>
+					<div class="optionsCell">&lt; &gt;</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Force Calc</div>
+					<div class="optionsCell">
+						<select id="movement" onchange="setMovement(this.value);">
+							<option value="moveLength" >Length</option>
+							<option value="moveRadius" >Radius</option>
+						</select>
+					</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell">Offscreen behavior</div>
+					<div class="optionsCell">
+						<select id="offscreen" onchange="setOffscreen(this.value);">
+							<option value="randomizePos" >Random</option>
+							<option value="randomFadeIn" >Random (Fade)</option>
+							<option value="wrap" >Wrap</option>
+						</select>
+					</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell double"><button onclick="stars=[]; updateStarCount();">New stars</button></div>
+					<div class="optionsCell">n</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell double" ><button onclick="forces=[];">Clear Forces</button></div>
+					<div class="optionsCell">c</div>
+				</div>
+				<div class="optionsRow">
+					<div class="optionsCell double"><button onclick="refreshUrl();">Save as URL</button></div>
+					<div class="optionsCell">s</div>
+				</div>
+			</div>
+			<div id="optionsClose" onclick="hideOptions();" >X</div>
 		</div>
 		<script>
-			var ANIMATION_FRAME = false;
+			// =settings=
+			var ANIMATION_FRAME = true;
 			var SPEED = 1; // only used if ANIMATION_FRAME == false
-			var NUM_STARS = 1000;
-			var FORCE_DIST = 200;
-			var DEBUG = true;
-			var CLEAR_ON_DRAW = true;
+			var PAUSED;
+			var MODE;
+			var NUM_STARS;
+			var FORCE_DIST;
+			var DEBUG;
+			var CLEAR_ON_DRAW;
+			var STRENGTH;
+			// =template methods=
+			var noop = function(){};
+			var handleOffScreen;
+			var getInitPos = resetOrigPos; //xSpreadPos; //randomPos;
+			var getInitColor = randomColor; //rainbowColor;
+			var recolor; // = recolorPos;
+			var moveStars;
+			// =canvas=
 			var canvas = document.getElementById('space');
 			canvas.width = document.body.clientWidth;
 			canvas.height = document.body.clientHeight;
@@ -44,45 +188,263 @@
 			ctx.textAlign = "end";
 			
 			var stars = [];
-			var hiddenStars = [];
 			var forces = [];
+			
 			//populate
-			for(var i=0; i<NUM_STARS; i++) {
-				stars.push({
-					pos: {
-						x: Math.random() * canvas.width,
-						y: Math.random() * canvas.height,
-					},
-					color: randomColor(),
-					hidden: false,
-				});
-			}
-			
-			var mouseDownPoint={x:0, y:0};
-			canvas.onmousedown = function (e) {
-				mouseDownPoint = {x: e.clientX, y: e.clientY};
-			}
-			canvas.onmouseup = function (e) {
-				forces.push({
-					pos: mouseDownPoint, 
-					vect: sub({x: e.clientX, y: e.clientY}, mouseDownPoint), 
-					strength: 5
-				});
-			}
-			
-			//start
-			start();
-			
-			function start() {
-				if (ANIMATION_FRAME && window.requestAnimationFrame) {
-					tick();
+			function updateStarCount() {
+				if (stars.length > NUM_STARS) {
+					stars = stars.slice(0, NUM_STARS);
 				} else {
-					ANIMATION_FRAME = false;
-					setInterval(tick, SPEED);
+					for (var i=stars.length; i<NUM_STARS; i++) {
+						var star = {};
+						star.pos = getInitPos(i, NUM_STARS);
+						star.color = getInitColor(i, NUM_STARS, star);
+						stars.push(star);
+					}
 				}
 			}
+			// =state persistence=
+			function refreshUrl() {
+				location.hash = '#' + rison.encode({
+					v: 1,
+					width: canvas.width,
+					height: canvas.height,
+					options: {
+						redraw: CLEAR_ON_DRAW,
+						nbrStars: NUM_STARS,
+						forceDist: FORCE_DIST,
+						moveStars: moveStars.name,
+						offscreen: handleOffScreen.name
+					},
+					forces: forces
+				});
+			}
+			function loadFromUrl() {
+				var strState = location.hash;
+				if (strState.length > 1) {
+					// remove #
+					strState = strState.substring(1, strState.length);
+					// if the browser uri encoded it before copy, decode it (I'm looking at you firefox)
+					if (strState[0] == '%') {
+						strState = decodeURIComponent(strState);
+					}
+					state = rison.decode(strState);
+					if (state.v == 1) {
+						if (state.forces) {
+							forces = state.forces;
+						}
+						if (state.width) {
+							canvas.width = state.width;
+						}
+						if (state.height) {
+							canvas.height = state.height;
+						}
+						if (state.options) {
+							if (typeof state.options.redraw === 'boolean') {
+								setRedraw(state.options.redraw);
+							}
+							if (state.options.nbrStars) {
+								setNumStars(state.options.nbrStars);
+							}
+							if (state.options.forceDist) {
+								setForceDist(state.options.forceDist);
+							}
+							if (state.options.moveStars) {
+								setMovement(state.options.moveStars);
+							}
+							if (state.options.offscreen) {
+								setOffscreen(state.options.offscreen);
+							}
+						}
+					}
+				}
+			}
+			
+			// ==events==
+			// =mouse clicks=
+			;(function() {
+				var mouseDownPoint={x:0, y:0};
+				var mouseDownForce = null;
+				var dragOffset={x:0, y:0};
+				function onmove(e) {
+					var mouseMovePoint = {x: e.clientX, y: e.clientY};
+					if(MODE === 1 && mouseDownForce && dragOffset) {
+						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
+					}
+				}
+				canvas.onmousedown = function (e) {
+					if (e.which == 1) {
+						mouseDownPoint = {x: e.clientX, y: e.clientY};
+						if (MODE === 0) {
+						} else if(MODE === 1) {
+							for (i in forces) {
+								var force = forces[i];
+								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
+									mouseDownForce = force;
+									dragOffset = sub(force.pos, mouseDownPoint);
+									canvas.onmousemove = onmove;
+									break;
+								}
+							}
+						}
+					}
+				};
+				canvas.onmouseup = function (e) {
+					if (e.which == 1) {
+						var mouseUpPoint = {x: e.clientX, y: e.clientY};
+						if (MODE === 0) {
+							if (!eq(mouseDownPoint, mouseUpPoint)) {
+								forces.push({
+									pos: mouseDownPoint,
+									vect: sub(mouseUpPoint, mouseDownPoint),
+									strength: STRENGTH
+								});
+							}
+						} else if(MODE === 1 && mouseDownForce && dragOffset) {
+							mouseDownForce.pos = add(mouseUpPoint, dragOffset);
+							dragOffset = {x:0, y:0};
+						}
+					}
+					canvas.onmousemove = null;
+				};
+				
+				// =keyboard events=
+				document.onkeyup = function(e) {
+					e = e || window.event;
+					switch (e.charCode || e.keyCode || e.key) {
+						case 13: // enter
+						case 27: // escape
+							hideOptions();
+							break;
+						case 46: //delete
+							//remove force
+							forces.splice(forces.indexOf(mouseDownForce), 1);
+							break;
+						case 187: // plus (+)
+							//increase strength
+							setStrength(STRENGTH+1);
+							break;
+						case 189: // minus (-)
+							//decrease strength
+							setStrength(STRENGTH-1);
+							break;
+						case 188: // left angle bracket (<)
+							//decrease number of stars
+							setNumStars(NUM_STARS-10);
+							break;
+						case 190: // right angle bracket (>)
+							//increase number of stars
+							setNumStars(NUM_STARS+10);
+							break;
+						case 219: // left bracket ([)
+							//decrease force distance
+							setForceDist(FORCE_DIST-5);
+							break;
+						case 221: //right bracket (])
+							//increase force distance
+							setForceDist(FORCE_DIST+5);
+							break;
+						case 67: // c
+							forces = [];
+							break;
+						case 68: // d
+							setDebug(!DEBUG);
+							break;
+						case 77: // m
+							setMode((MODE+1)%2);
+							break;
+						case 78: // n
+							stars = [];
+							updateStarCount();
+							break;
+						case 80: // p
+							setPaused(!PAUSED);
+							break;
+						case 82: // r
+							setRedraw(!CLEAR_ON_DRAW);
+							break;
+						case 83: // s
+							refreshUrl();
+							break;
+					}
+					
+				};
+			})();
+			
+			function showOptions() {
+				document.getElementById('optionsPanel').style.display = 'block';
+			}
+			function hideOptions() {
+				document.getElementById('optionsPanel').style.display = 'none';
+			}
+			function setDebug(bool) {
+				document.getElementById('debug').checked = bool;
+				DEBUG = bool;
+			}
+			function setStrength(num) {
+				num = parseInt(num);
+				if (isNaN(num) || num < 0) {
+					num = STRENGTH;
+				}
+				document.getElementById('strength').value = num;
+				STRENGTH = num;
+			}
+			function setRedraw(bool) {
+				document.getElementById('redraw').checked = bool;
+				CLEAR_ON_DRAW = bool;
+			}
+			function setNumStars(num) {
+				num = parseInt(num);
+				if (isNaN(num) || num < 0) {
+					num = NUM_STARS;
+				}
+				document.getElementById('stars').value = num;
+				NUM_STARS = num;
+				updateStarCount();
+			}
+			function setForceDist(num) {
+				num = parseInt(num);
+				if (isNaN(num) || num < 0) {
+					num = FORCE_DIST;
+				}
+				document.getElementById('forceDist').value = num;
+				FORCE_DIST = num;
+			}
+			function setMovement(movement) {
+				var fn = window[movement];
+				if (typeof fn === 'function') {
+					document.getElementById('movement').value = movement;
+					moveStars = fn;
+				}
+			}
+			function setOffscreen(offscreen) {
+				var fn = window[offscreen];
+				if (typeof fn === 'function') {
+					document.getElementById('offscreen').value = offscreen;
+					handleOffScreen = fn;
+				}
+			}
+			function setPaused(bool) {
+				document.getElementById('paused').checked = bool;
+				PAUSED = bool;
+			}
+			function setMode(num) {
+				if (isNaN(num) || num < 0 || num < 0 || num > 1) {
+					num = MODE;
+				}
+				document.getElementById('mode').value = num;
+				MODE = num;
+			}
+			
 			function tick() {
-				moveStars(stars);
+				if (!PAUSED) {
+					moveStars(stars, forces);
+					if (recolor) {
+						for (var i in stars) {
+							stars[i].color = recolor(i, NUM_STARS, stars[i]);
+						}
+					}
+				}
 				if (CLEAR_ON_DRAW) {
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 				}
@@ -95,44 +457,13 @@
 				if (ANIMATION_FRAME) {
 					requestAnimationFrame(tick);
 				}
-				while(s = hiddenStars.shift()) {
-					stars[s].pos = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
-					stars[s].hidden = false;
-				}
 			}
-			var fps = 0;
-			var frameCount = 0;
-			function drawFps() {
-				frameCount++;
-				ctx.fillStyle = "#ffffff";
-				ctx.fillText(fps+" fps", canvas.width-10, 20);
-			}
-			setInterval(function() {
-				fps = frameCount;
-				frameCount = 0;
-			}, 1000);
 			
-			var lastFrame = new Date().getTime();
-			function drawFramerate() {
-				var thisFrame = new Date().getTime();
-				ctx.fillStyle = "#ffffff";
-				ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
-				lastFrame = thisFrame;
-			}
-			function dist(pos1, pos2) {
-				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
-			}
+			// ==rendering==
 			function drawStars(stars) {
-				for(var i in stars) {
-					if (!stars[i].hidden) {
-						if (isOutsideScreen(stars[i])) {
-							stars[i].hidden = true;
-							hiddenStars.push(i);
-						} else {
-							ctx.fillStyle = stars[i].color;
-							drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
-						}
-					}
+				for (var i in stars) {
+					ctx.fillStyle = stars[i].color;
+					drawStar(stars[i].pos.x, stars[i].pos.y, ctx);
 				}
 			}
 			function drawStar(x, y, ctx) {
@@ -143,7 +474,7 @@
 			}
 			function drawForces(forces) {
 				ctx.strokeStyle = "#ffffff";
-				for(var i in forces) {
+				for (var i in forces) {
 					drawForce(forces[i], ctx);
 				}
 			}
@@ -154,38 +485,165 @@
 				ctx.lineTo(force.pos.x+force.vect.x, force.pos.y+force.vect.y);
 				ctx.stroke();
 				ctx.beginPath();
-				ctx.arc(force.pos.x+force.vect.x, force.pos.y+force.vect.y, force.strength*2, 0, Math.PI*2, true);
+				ctx.arc(force.pos.x, force.pos.y, force.strength*FORCE_DIST, 0, Math.PI*2, true);
 				ctx.stroke();
 			}
-			function randomColor() {
-				return "#"+randomHex()+randomHex()+randomHex()+randomHex()+randomHex()+randomHex();
+			// =fps=
+			var drawFps = (function() {
+				var fps = 0;
+				var frameCount = 0;
+				setInterval(function() {
+					fps = frameCount;
+					frameCount = 0;
+				}, 1000); //1 second
+				return function() {
+					frameCount++;
+					ctx.fillStyle = "#ffffff";
+					ctx.fillText(fps+" fps", canvas.width-10, 20);
+				}
+			})();
+			
+			// =framerate=
+			var drawFramerate = (function() {
+				var lastFrame = new Date().getTime();
+				return function() {
+					var thisFrame = new Date().getTime();
+					ctx.fillStyle = "#ffffff";
+					ctx.fillText((thisFrame - lastFrame) / 1000, canvas.width-10, 10);
+					lastFrame = thisFrame;
+				}
+			})();
+			// =pos=
+			function randomPos() {
+				return {
+					x: Math.random() * canvas.width,
+					y: Math.random() * canvas.height,
+				};
 			}
-			function randomHex() {
-				return Math.round(Math.random() * 16).toString(16);
+			function xSpreadPos(i, totalCount) {
+				return {
+					x: (i / totalCount) * canvas.width,
+					y: Math.random() * canvas.height,
+				};
+			}
+			function gridPos(i, totalCount) {
+				var val = i / totalCount * canvas.width * canvas.height;
+				return {
+					x: val % canvas.width,
+					y: val / canvas.height,
+				};
+			}
+			function resetOrigPos() {
+				var pos = randomPos();
+				pos.xOrig = pos.x;
+				pos.yOrig = pos.y;
+				return pos;
+			}
+			// =color=
+			function randomColor() {
+				return "#"+Math.round(Math.random() * Math.pow(16, 6)).toString(16);
+			}
+			function rainbowColor(i, total) {
+				return "hsl("+(i / total * 360)+", 100%, 50%)";
+			}
+			function recolorPos(i, total, star) {
+				return "hsl("+huePos(star)+", 100%, "+lightnessSparkle(star)+"%)";
+			}
+			function huePos(star) {
+				return star.pos.x / canvas.width * 360;
+			}
+			function lightnessSparkle(star) {
+				var OSCILLATION_SPEED =  0.02;
+				if (typeof star.brightness == 'undefined') {
+					star.brightness = Math.random() * Math.PI;
+				} else if (star.brightness > Math.PI) {
+					star.brightness = 0;
+					star.pos.x = star.pos.xOrig;
+					star.pos.y = star.pos.yOrig;
+				} else {
+					star.brightness += OSCILLATION_SPEED;
+				}
+				return Math.round(Math.sin(star.brightness)*90);
 			}
 			function isOutsideScreen(star) {
 				return star.pos.x < 0 || star.pos.y < 0 ||
 					star.pos.x > canvas.width || star.pos.y > canvas.height;
 			}
 			// ==Movement==
-			function moveStars(stars) {
-					for (var f in forces) {
+			function moveLength(stars, forces) {
+				for (var f in forces) {
 					var force = forces[f];
 					var forceEnd = add(force.pos, force.vect);
-					for(var i in stars) {
+					for (var i in stars) {
 						var star = stars[i];
 						var d = distPointToSegment(star.pos, force.pos, forceEnd);
-						if (d < FORCE_DIST) {
-							var pull = force.strength * (FORCE_DIST - d) / FORCE_DIST;
+						var forceReach = force.strength * FORCE_DIST;
+						if (d < forceReach) {
+							var pull = force.strength * (forceReach - d) / forceReach;
+							var magnitude = norm(force.vect);
+							var unitVect = vMulScalar(1/magnitude, force.vect);
 							if (force.vect.x) {
-								star.pos.x += pull * force.vect.x / Math.abs(force.vect.x);
+								star.pos.x += pull * unitVect.x;
 							}
 							if (force.vect.y) {
-								star.pos.y += pull * force.vect.y / Math.abs(force.vect.y);
+								star.pos.y += pull * unitVect.y;
+							}
+							if (isOutsideScreen(star)) {
+								handleOffScreen(star);
 							}
 						}
 					}
 				}
+			}
+			function moveRadius(stars, forces) {
+				for (var f in forces) {
+					var force = forces[f];
+					for (var i in stars) {
+						var star = stars[i];
+						var d = dist(star.pos, force.pos);
+						var forceReach = force.strength * FORCE_DIST;
+						if (d < forceReach) {
+							var pull = force.strength * (forceReach - d) / forceReach;
+							var magnitude = norm(force.vect);
+							var unitVect = vMulScalar(1/magnitude, force.vect);
+							if (force.vect.x) {
+								star.pos.x += pull * unitVect.x;
+							}
+							if (force.vect.y) {
+								star.pos.y += pull * unitVect.y;
+							}
+							if (isOutsideScreen(star)) {
+								handleOffScreen(star);
+							}
+						}
+					}
+				}
+			}
+			// =off screen=
+			function wrap(star) {
+				if (star.pos.x < 0) {
+					star.pos.x = canvas.width;
+				}
+				if (star.pos.y < 0) {
+					star.pos.y = canvas.height;
+				}
+				if (star.pos.x > canvas.width) {
+					star.pos.x = 0;
+				}
+				if (star.pos.y > canvas.height) {
+					star.pos.y = 0;
+				}
+			}
+			function randomizePos(star) {
+				star.pos.x = Math.random() * canvas.width;
+				star.pos.y = Math.random() * canvas.height;
+			}
+			function randomFadeIn(star) {
+				randomizePos(star);
+				star.brightness = 0;
+			}
+			function dist(pos1, pos2) {
+				return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 			}
 			// http://geomalgorithms.com/a02-_lines.html
 			function distPointToSegment(point, segStart, segEnd) {
@@ -222,6 +680,30 @@
 			function vMulScalar(s, v) {
 				return {x: v.x * s, y: v.y * s};
 			}
+			function eq(a, b) {
+				return a.x == b.x && a.y == b.y;
+			}
+			
+			loadFromUrl();
+			// defaults
+			if (typeof PAUSED !== 'boolean') setPaused(false);
+			if (typeof MODE !== 'integer') setMode(0);
+			if (typeof DEBUG !== 'boolean') setDebug(false);
+			if (!STRENGTH) setStrength(5);
+			if (typeof CLEAR_ON_DRAW !== 'boolean') setRedraw(true);
+			if (!NUM_STARS) setNumStars(1000);
+			if (!FORCE_DIST) setForceDist(40);
+			if (!handleOffScreen) setOffscreen('randomizePos');
+			if (!moveStars) setMovement('moveLength');
+			//	=start=
+			;(function() {
+				if (ANIMATION_FRAME && window.requestAnimationFrame) {
+					tick();
+				} else {
+					ANIMATION_FRAME = false;
+					setInterval(tick, SPEED);
+				}
+			})();
 		</script>
 	</body>
 </html>
