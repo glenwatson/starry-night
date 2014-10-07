@@ -104,6 +104,7 @@
 						<select id="mode" onchange="setMode(this.value);">
 							<option value="0" >Add</option>
 							<option value="1" >Edit</option>
+							<option value="2" >Draw</option>
 						</select>
 					</div>
 					<div class="optionsCell">m</div>
@@ -264,8 +265,17 @@
 				var dragOffset = {x:0, y:0};
 				function onmove(e) {
 					var mouseMovePoint = {x: e.clientX, y: e.clientY};
-					if (MODE === 1 && mouseDownForce && dragOffset) {
+                    if (MODE === 1 && mouseDownForce && dragOffset) {
+                        mouseDownForce.pos = add(mouseMovePoint, dragOffset);
+                    } else if (MODE === 1 && mouseDownForce && dragOffset) {
 						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
+					} else if(MODE == 2 && dist(mouseMovePoint, mouseDownPoint) > STRENGTH * FORCE_DIST) {
+						forces.push({
+									pos: mouseDownPoint,
+									vect: sub(mouseMovePoint, mouseDownPoint),
+									strength: STRENGTH
+								});
+						mouseDownPoint = mouseMovePoint;
 					}
 				}
 				debugCanvas.onmousedown = function (e) {
@@ -283,6 +293,8 @@
 									break;
 								}
 							}
+						} else if (MODE === 2) {
+							debugCanvas.onmousemove = onmove;
 						}
 					}
 				};
@@ -324,7 +336,7 @@
 							setDebug(!DEBUG);
 							break;
 						case 77: // m
-							setMode((MODE+1)%2);
+							setMode((MODE+1)%3);
 							break;
 						case 78: // n
 							stars = [];
@@ -431,7 +443,7 @@
 			}
 			function setMode(num) {
 				num = parseInt(num);
-				if (isNaN(num) || num < 0 || num < 0 || num > 1) {
+				if (isNaN(num) || num < 0 || num < 0 || num > 2) {
 					num = MODE;
 				}
 				document.getElementById('mode').value = num;
