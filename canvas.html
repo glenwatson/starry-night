@@ -581,10 +581,14 @@
 			}
 			// =color=
 			function randomColor() {
-				return "#"+Math.round(Math.random() * Math.pow(16, 6)).toString(16);
+				return 'hsl('+rand(0, 360)+', '+rand(10, 100)+'%, '+rand(20, 75)+'%)';
+				//return "#"+("000000"+(Math.round(Math.random() * Math.pow(16, 6))).toString(16)).slice(-6);
 			}
 			function rainbowColor(i, total) {
 				return "hsl("+(i / total * 360)+", 100%, 50%)";
+			}
+			function rand(max, min) {
+				return Math.random() * (max - min) + min;
 			}
 			function recolorPos(i, total, star) {
 				return "hsl("+huePos(star)+", 100%, "+lightnessSparkle(star)+"%)";
