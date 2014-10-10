@@ -14,6 +14,17 @@
 				font-size: 22px;
 				background-color: #000;
 			}
+			#instructions {
+				margin-top: 15%;
+				text-align: center;
+				font-size: 50px;
+				color: #fff;
+			}
+			#instrOptions {
+				position: absolute;
+				bottom: 20px;
+				left: 20px;
+			}
 			canvas {
 				position: absolute;
 				left: 0;
@@ -163,7 +174,29 @@
 			</div>
 			<div id="optionsClose" onclick="hideOptions();" >X</div>
 		</div>
+		<div id="instructions">
+			<div>Click and drag on the sky to move the stars.</div>
+			<div id="instrOptions">Options are down here</div>
+		</div>
 		<script>
+			// =fade instructions=
+			(function() {
+				var instructions = document.getElementById('instructions')
+				var color = 255;
+				var fadeId;
+				function instructionsFade() {
+					var hex = ("00"+color.toString(16)).slice(-2);
+					instructions.style.color = '#'+hex+hex+hex;
+					color -= Math.round((355-color)/100);
+					if (color < 0) {
+						clearTimeout(fadeId);
+						document.getElementsByTagName('body')[0].removeChild(instructions)
+					} else {
+						setTimeout(instructionsFade, 1);
+					}
+				}
+				instructionsFade();
+			})();
 			// ==set-up==
 			// =settings=
 			var ANIMATION_FRAME = true;
