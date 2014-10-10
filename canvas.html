@@ -181,21 +181,24 @@
 		<script>
 			// =fade instructions=
 			(function() {
-				var instructions = document.getElementById('instructions')
-				var color = 255;
-				var fadeId;
-				function instructionsFade() {
-					var hex = ("00"+color.toString(16)).slice(-2);
-					instructions.style.color = '#'+hex+hex+hex;
-					color -= Math.round((355-color)/100);
-					if (color < 0) {
-						clearTimeout(fadeId);
-						document.getElementsByTagName('body')[0].removeChild(instructions)
-					} else {
-						setTimeout(instructionsFade, 1);
+				if (document.cookie.indexOf('seenInstructions') === -1) {
+					var instructions = document.getElementById('instructions')
+					var color = 255;
+					var fadeId;
+					function instructionsFade() {
+						var hex = ("00"+color.toString(16)).slice(-2);
+						instructions.style.color = '#'+hex+hex+hex;
+						color -= Math.round((355-color)/100);
+						if (color < 0) {
+							clearTimeout(fadeId);
+							document.getElementsByTagName('body')[0].removeChild(instructions);
+							document.cookie = 'seenInstructions=true;';
+						} else {
+							setTimeout(instructionsFade, 1);
+						}
 					}
+					instructionsFade();
 				}
-				instructionsFade();
 			})();
 			// ==set-up==
 			// =settings=
