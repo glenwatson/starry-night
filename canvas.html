@@ -181,8 +181,8 @@
 		<script>
 			// =fade instructions=
 			(function() {
+				var instructions = document.getElementById('instructions');
 				if (document.cookie.indexOf('seenInstructions') === -1) {
-					var instructions = document.getElementById('instructions')
 					var color = 255;
 					var fadeId;
 					function instructionsFade() {
@@ -198,6 +198,8 @@
 						}
 					}
 					instructionsFade();
+				} else {
+					document.getElementsByTagName('body')[0].removeChild(instructions);
 				}
 			})();
 			// ==set-up==
