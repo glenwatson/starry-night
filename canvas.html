@@ -96,7 +96,7 @@
 	<body>
 		<canvas id="space">No canvas support</canvas>
 		<canvas id="overlayCanvas"></canvas>
-		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
+		<img id="options" onclick="showOptions();" src="img/gear512.png" />
 		<div id="optionsPanel" style="display:none;" >
 			<div id="optionsContainer" >
 				<div class="optionsRow">
@@ -297,64 +297,76 @@
 			
 			// ==events==
 			// =mouse clicks=
-			;(function () {
-				var mouseDownPoint = {x:0, y:0};
-				var mouseDownForce = null;
+			(function () {
+				var pointerDownPoint = {x:0, y:0};
+				var pointerUpPoint = {x:0, y:0};
+				var pointerDownForce = null;
 				var dragOffset = {x:0, y:0};
-				function onmove(e) {
-					var mouseMovePoint = {x: e.clientX, y: e.clientY};
-                    if (MODE === 1 && mouseDownForce && dragOffset) {
-                        mouseDownForce.pos = add(mouseMovePoint, dragOffset);
-                    } else if (MODE === 1 && mouseDownForce && dragOffset) {
-						mouseDownForce.pos = add(mouseMovePoint, dragOffset);
-					} else if(MODE == 2 && dist(mouseMovePoint, mouseDownPoint) > STRENGTH * FORCE_DIST) {
-						forces.push({
-									pos: mouseDownPoint,
-									vect: sub(mouseMovePoint, mouseDownPoint),
-									strength: STRENGTH
-								});
-						mouseDownPoint = mouseMovePoint;
+				function getXYForEvent(event) {
+					if (event.targetTouches) {
+						return {x: event.targetTouches[0].clientX, y: event.targetTouches[0].clientY};
 					}
+					return {x: event.clientX, y: event.clientY};
 				}
-				overlayCanvas.onmousedown = function (e) {
-					if (e.which == 1) {
-						mouseDownPoint = {x: e.clientX, y: e.clientY};
-						if (MODE === 0) {
-							// Already captured mouseDownPoint
-						} else if (MODE === 1) {
-							for (i in forces) {
-								var force = forces[i];
-								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
-									mouseDownForce = force;
-									dragOffset = sub(force.pos, mouseDownPoint);
-									overlayCanvas.onmousemove = onmove;
-									break;
-								}
-							}
-						} else if (MODE === 2) {
-							overlayCanvas.onmousemove = onmove;
-						}
-					}
-				};
-				overlayCanvas.onmouseup = function (e) {
-					if (e.which == 1) {
-						var mouseUpPoint = {x: e.clientX, y: e.clientY};
-						if (MODE === 0) {
-							if (!eq(mouseDownPoint, mouseUpPoint)) {
-								forces.push({
-									pos: mouseDownPoint,
-									vect: sub(mouseUpPoint, mouseDownPoint),
+				function pointerMove(e) {
+					var pointerMovePoint = getXYForEvent(e);
+                    if (MODE === 1 && pointerDownForce && dragOffset) {  // EDIT
+                        pointerDownForce.pos = add(pointerMovePoint, dragOffset);
+                    } else if (MODE === 1 && pointerDownForce && dragOffset) {  // EDIT
+						pointerDownForce.pos = add(pointerMovePoint, dragOffset);
+					} else if(MODE === 2 && dist(pointerMovePoint, pointerDownPoint) > STRENGTH * FORCE_DIST) {  // DRAW
+						forces.push({
+									pos: pointerDownPoint,
+									vect: sub(pointerMovePoint, pointerDownPoint),
 									strength: STRENGTH
 								});
+						pointerDownPoint = pointerMovePoint;
+					}
+					pointerUpPoint = pointerMovePoint;
+				}
+				function pointerDown(e) {
+					pointerDownPoint = getXYForEvent(e);
+					if (MODE === 0) {  // ADD
+						// Already captured pointerDownPoint
+					} else if (MODE === 1) {  // EDIT
+						for (var i in forces) {
+							var force = forces[i];
+							if (dist(pointerDownPoint, force.pos) < force.strength * FORCE_DIST) {
+								pointerDownForce = force;
+								dragOffset = sub(force.pos, pointerDownPoint);
+								break;
 							}
-						} else if (MODE === 1 && mouseDownForce && dragOffset) {
-							mouseDownForce.pos = add(mouseUpPoint, dragOffset);
-							dragOffset = {x:0, y:0};
 						}
+					} else if (MODE === 2) {  // DRAW
+						// Already captured pointerDownPoint
+					}
+					overlayCanvas.onmousemove = pointerMove;
+					overlayCanvas.ontouchmove = pointerMove;
+				}
+				function pointerUp() {
+					/* Can't capture the pointerUpPoint here because ontouchend events don't have coordinates
+					// var pointerUpPoint = getXYForEvent(e);
+					 */
+					if (MODE === 0) {  // ADD
+						if (!eq(pointerDownPoint, pointerUpPoint)) {
+							forces.push({
+								pos: pointerDownPoint,
+								vect: sub(pointerUpPoint, pointerDownPoint),
+								strength: STRENGTH
+							});
+						}
+					} else if (MODE === 1 && pointerDownForce && dragOffset) {  // EDIT
+						pointerDownForce.pos = add(pointerUpPoint, dragOffset);
+						dragOffset = {x:0, y:0};
 					}
 					overlayCanvas.onmousemove = null;
-				};
-				
+					overlayCanvas.ontouchmove = null;
+				}
+				overlayCanvas.onmousedown = pointerDown;
+				overlayCanvas.ontouchstart= pointerDown;
+				overlayCanvas.onmouseup = pointerUp;
+				overlayCanvas.ontouchend = pointerUp;
+
 				// =keyboard events=
 				document.onkeyup = function (e) {
 					e = e || window.event;
@@ -365,7 +377,7 @@
 							break;
 						case 46: //delete
 							//remove force
-							forces.splice(forces.indexOf(mouseDownForce), 1);
+							forces.splice(forces.indexOf(pointerDownForce), 1);
 							break;
 						case 67: // c
 							forces = [];
