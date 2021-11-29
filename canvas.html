@@ -95,7 +95,7 @@
 	</head>
 	<body>
 		<canvas id="space">No canvas support</canvas>
-		<canvas id="debug"></canvas>
+		<canvas id="overlayCanvas"></canvas>
 		<img id="options" onmouseover="showOptions();" src="img/gear512.png" />
 		<div id="optionsPanel" style="display:none;" >
 			<div id="optionsContainer" >
@@ -226,10 +226,10 @@
 			canvas.height = document.body.clientHeight;
 			var ctx = canvas.getContext('2d');
 			
-			var debugCanvas = document.getElementById('debug');
-			debugCanvas.width = document.body.clientWidth;
-			debugCanvas.height = document.body.clientHeight;
-			var debugCtx = debugCanvas.getContext('2d');
+			var overlayCanvas = document.getElementById('overlayCanvas');
+			overlayCanvas.width = document.body.clientWidth;
+			overlayCanvas.height = document.body.clientHeight;
+			var debugCtx = overlayCanvas.getContext('2d');
 			debugCtx.font = "8pt Arial";
 			debugCtx.textAlign = "end";
 			
@@ -268,11 +268,11 @@
 						}
 						if (state.width) {
 							canvas.width = state.width;
-							debugCanvas.width = state.width;
+							overlayCanvas.width = state.width;
 						}
 						if (state.height) {
 							canvas.height = state.height;
-							debugCanvas.height = state.height;
+							overlayCanvas.height = state.height;
 						}
 						if (state.options) {
 							if (typeof state.options.redraw === 'boolean') {
@@ -316,7 +316,7 @@
 						mouseDownPoint = mouseMovePoint;
 					}
 				}
-				debugCanvas.onmousedown = function (e) {
+				overlayCanvas.onmousedown = function (e) {
 					if (e.which == 1) {
 						mouseDownPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
@@ -327,16 +327,16 @@
 								if (dist(mouseDownPoint, force.pos) < force.strength * FORCE_DIST) {
 									mouseDownForce = force;
 									dragOffset = sub(force.pos, mouseDownPoint);
-									debugCanvas.onmousemove = onmove;
+									overlayCanvas.onmousemove = onmove;
 									break;
 								}
 							}
 						} else if (MODE === 2) {
-							debugCanvas.onmousemove = onmove;
+							overlayCanvas.onmousemove = onmove;
 						}
 					}
 				};
-				debugCanvas.onmouseup = function (e) {
+				overlayCanvas.onmouseup = function (e) {
 					if (e.which == 1) {
 						var mouseUpPoint = {x: e.clientX, y: e.clientY};
 						if (MODE === 0) {
@@ -352,7 +352,7 @@
 							dragOffset = {x:0, y:0};
 						}
 					}
-					debugCanvas.onmousemove = null;
+					overlayCanvas.onmousemove = null;
 				};
 				
 				// =keyboard events=
@@ -514,7 +514,7 @@
 				if (CLEAR_ON_DRAW) {
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 				}
-				debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height);
+				debugCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 				drawStars(stars);
 				if (DEBUG) {
 					drawForces(forces);
@@ -567,7 +567,7 @@
 				return function () {
 					frameCount++;
 					debugCtx.fillStyle = "#ffffff";
-					debugCtx.fillText(fps+" fps", debugCanvas.width-10, 20);
+					debugCtx.fillText(fps+" fps", overlayCanvas.width-10, 20);
 				}
 			})();
 			
@@ -577,18 +577,18 @@
 				return function () {
 					var thisFrame = new Date().getTime();
 					debugCtx.fillStyle = "#ffffff";
-					debugCtx.fillText((thisFrame - lastFrame) / 1000, debugCanvas.width-10, 10);
+					debugCtx.fillText((thisFrame - lastFrame) / 1000, overlayCanvas.width-10, 10);
 					lastFrame = thisFrame;
 				}
 			})();
 			function drawOptions() {
 				debugCtx.fillStyle = "#ffffff";
-				debugCtx.fillText("Redraw: "+CLEAR_ON_DRAW, debugCanvas.width-10, 30);
-				debugCtx.fillText("Paused: "+PAUSED, debugCanvas.width-10, 40);
-				debugCtx.fillText("Mode: "+MODE, debugCanvas.width-10, 50);
-				debugCtx.fillText("Strength: "+STRENGTH, debugCanvas.width-10, 60);
-				debugCtx.fillText("Force Dist: "+FORCE_DIST, debugCanvas.width-10, 70);
-				debugCtx.fillText("#Stars: "+NUM_STARS, debugCanvas.width-10, 80);
+				debugCtx.fillText("Redraw: "+CLEAR_ON_DRAW, overlayCanvas.width-10, 30);
+				debugCtx.fillText("Paused: "+PAUSED, overlayCanvas.width-10, 40);
+				debugCtx.fillText("Mode: "+MODE, overlayCanvas.width-10, 50);
+				debugCtx.fillText("Strength: "+STRENGTH, overlayCanvas.width-10, 60);
+				debugCtx.fillText("Force Dist: "+FORCE_DIST, overlayCanvas.width-10, 70);
+				debugCtx.fillText("#Stars: "+NUM_STARS, overlayCanvas.width-10, 80);
 
 			}
 			// =pos=
